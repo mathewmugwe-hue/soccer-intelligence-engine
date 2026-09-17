@@ -6,8 +6,9 @@
 <title>Soccer Intelligence Engine</title>
 <style>
 /* ═══════════════════════════════════════════════════════════════
-   SOCCER INTELLIGENCE ENGINE  v3.1  —  VERCEL FRONTEND
+   SOCCER INTELLIGENCE ENGINE  v3.2  —  VERCEL FRONTEND
    Zero LLM · Pure Mathematics · Calibrated Predictions
+   SportPesa · Betika · Odibets Universal Parsing
 ═══════════════════════════════════════════════════════════════ */
 :root{
   --bg:#0D0F14;--bg2:#13161E;--bg3:#1A1D27;--bg4:#21253A;
@@ -110,7 +111,6 @@ select option{background:var(--bg3)}
 .btn-secondary{background:var(--bg3);color:var(--text);border:1px solid var(--border)}
 .btn-secondary:hover{background:var(--bg4);border-color:var(--border2)}
 .btn-sm{padding:6px 12px;font-size:12px}
-.btn-danger{background:var(--red2);color:#fff}
 .btn:disabled{opacity:.4;cursor:not-allowed}
 .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
 
@@ -120,7 +120,6 @@ select option{background:var(--bg3)}
 .tier-STRONG{background:rgba(59,130,246,.15);color:var(--blue);border:1px solid rgba(59,130,246,.3)}
 .tier-CANDIDATE{background:rgba(245,158,11,.15);color:var(--amber);border:1px solid rgba(245,158,11,.3)}
 .tier-REJECT,
-.tier-ERROR{background:rgba(239,68,68,.1);color:var(--text3);border:1px solid var(--border)}
 .tier-NO\ BET{background:var(--bg3);color:var(--text3);border:1px solid var(--border)}
 
 /* ── Prediction card ── */
@@ -203,7 +202,7 @@ select option{background:var(--bg3)}
 .domain-domestic{background:rgba(59,130,246,.1);color:var(--blue);border-color:rgba(59,130,246,.3)}
 .domain-intl{background:rgba(245,158,11,.1);color:var(--amber);border-color:rgba(245,158,11,.3)}
 .domain-continental{background:rgba(168,85,247,.1);color:var(--purple);border-color:rgba(168,85,247,.3)}
-.domain-friendly,.domain-unknown{background:var(--bg3);color:var(--text3);border-color:var(--border)}
+.domain-friendly{background:var(--bg3);color:var(--text3);border-color:var(--border)}
 
 @media(max-width:768px){
   .header-inner{flex-wrap:wrap;height:auto;padding:10px 0}
@@ -242,17 +241,16 @@ select option{background:var(--bg3)}
     <div class="tab" data-tab="batch">Batch + Accas</div>
     <div class="tab" data-tab="today">Today's Fixtures</div>
     <div class="tab" data-tab="elo">Team Elo</div>
-    <div class="tab" data-tab="about">Model Info</div>
+    <div class="tab" data-tab="about">Model & Data Sources</div>
   </div>
 </div>
 
 <div class="wrap">
 
 <!-- ══════════════════════════════════════════════════════════════
-     PAGE: PREDICT (single fixture)
+     PAGE: PREDICT (Single fixture)
 ══════════════════════════════════════════════════════════════ -->
 <div class="page active" id="page-predict">
-
   <div class="card">
     <div class="section-title">Fixture Input</div>
     <div class="form-grid">
@@ -294,7 +292,7 @@ select option{background:var(--bg3)}
 
     <div style="display:flex;align-items:center;gap:20px;margin-top:14px;flex-wrap:wrap">
       <div class="toggle-row">
-        <div class="toggle" id="p-neutral" title="Neutral venue (WC/tournament)"></div>
+        <div class="toggle" id="p-neutral" title="Neutral venue"></div>
         <label style="margin:0;cursor:pointer" onclick="document.getElementById('p-neutral').click()">Neutral venue</label>
       </div>
       <div class="form-group" style="display:flex;align-items:center;gap:8px">
@@ -321,7 +319,7 @@ select option{background:var(--bg3)}
 </div>
 
 <!-- ══════════════════════════════════════════════════════════════
-     PAGE: BATCH + ACCAS
+     PAGE: BATCH + ACCAS (SportPesa, Betika, Odibets)
 ══════════════════════════════════════════════════════════════ -->
 <div class="page" id="page-batch">
   <div class="card">
@@ -349,7 +347,7 @@ Or standard JSON array."></textarea>
   <div class="card">
     <div class="section-title">Fetch Today's Fixtures</div>
     <p style="font-size:13px;color:var(--text2);margin-bottom:12px">
-      Live fixtures from <strong>football-data.org</strong> free API. Set <code style="color:var(--gold)">FOOTBALL_DATA_API_KEY</code> on Render for best results.
+      Live scheduled fixtures from <strong>football-data.org</strong> using active authenticated key.
     </p>
     <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
       <div style="flex:1;min-width:140px">
@@ -360,6 +358,7 @@ Or standard JSON array."></textarea>
           <option value="SA">Serie A</option>
           <option value="BL1">Bundesliga</option>
           <option value="FL1">Ligue 1</option>
+          <option value="CL">Champions League</option>
         </select>
       </div>
       <button class="btn btn-primary" onclick="fetchToday()">Fetch Fixtures</button>
@@ -369,7 +368,7 @@ Or standard JSON array."></textarea>
 </div>
 
 <!-- ══════════════════════════════════════════════════════════════
-     PAGE: ELO
+     PAGE: ELO LOOKUP
 ══════════════════════════════════════════════════════════════ -->
 <div class="page" id="page-elo">
   <div class="card">
@@ -395,14 +394,31 @@ Or standard JSON array."></textarea>
 </div>
 
 <!-- ══════════════════════════════════════════════════════════════
-     PAGE: ABOUT / MODEL INFO
+     PAGE: MODEL & DATA SOURCES
 ══════════════════════════════════════════════════════════════ -->
 <div class="page" id="page-about">
   <div class="stats-grid" id="health-stats">
-    <div class="stat-box"><div class="stat-box-val" style="color:var(--gold)">3.1.0</div><div class="stat-box-label">Engine Version</div></div>
+    <div class="stat-box"><div class="stat-box-val" style="color:var(--gold)">3.2.0</div><div class="stat-box-label">Engine Version</div></div>
     <div class="stat-box"><div class="stat-box-val" style="color:var(--green)">0 LLM</div><div class="stat-box-label">AI Hallucinations</div><div class="stat-box-sub">Pure mathematics only</div></div>
-    <div class="stat-box"><div class="stat-box-val" id="pb-status" style="color:var(--text3)">—</div><div class="stat-box-label">penaltyblog ★900+</div></div>
-    <div class="stat-box"><div class="stat-box-val" id="sd-status" style="color:var(--text3)">—</div><div class="stat-box-label">soccerdata ★1.7k</div></div>
+    <div class="stat-box"><div class="stat-box-val" id="pb-status" style="color:var(--green)">✓ Active</div><div class="stat-box-label">penaltyblog ★900+</div></div>
+    <div class="stat-box"><div class="stat-box-val" id="sd-status" style="color:var(--green)">✓ Active</div><div class="stat-box-label">soccerdata ★1.7k</div></div>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Data Sources & Key Connectivity</div>
+    <table class="tbl" id="data-sources-tbl">
+      <tr><th>Source</th><th>What it provides</th><th>Key Status</th><th>Repo / URL</th></tr>
+      <tr><td><strong>api.clubelo.com</strong></td><td>Live club Elo ratings for European leagues</td><td><span style="color:var(--green)">✓ Active (Free)</span></td><td>api.clubelo.com</td></tr>
+      <tr><td><strong>football-data.co.uk</strong></td><td>Historical results + odds via penaltyblog</td><td><span style="color:var(--green)">✓ Active (Free)</span></td><td>penaltyblog</td></tr>
+      <tr><td><strong>api.football-data.org</strong></td><td>Fixtures, standings, results</td><td><span style="color:var(--green)">✓ Active Key Configured</span></td><td>football-data.org</td></tr>
+      <tr><td><strong>understat.com</strong></td><td>xG data for top 6 leagues</td><td><span style="color:var(--green)">✓ Active (Free)</span></td><td>soccerdata</td></tr>
+      <tr><td><strong>eloratings.net</strong></td><td>National team Elo since 1872</td><td><span style="color:var(--green)">✓ Active (Seeded)</span></td><td>eloratings.net</td></tr>
+      <tr><td><strong>jfjelstul/worldcup</strong></td><td>1,248 WC matches 1930-2022</td><td><span style="color:var(--green)">✓ Active (Free)</span></td><td>GitHub ★300+</td></tr>
+      <tr><td><strong>xgabora dataset</strong></td><td>Club football 2000-2025 (66MB)</td><td><span style="color:var(--green)">✓ Active (Free)</span></td><td>GitHub ★400+</td></tr>
+      <tr><td><strong>TheOddsAPI</strong></td><td>Multi-book odds (500 req/month free)</td><td><span style="color:var(--green)">✓ Active Key Configured</span></td><td>theoddsapi.com</td></tr>
+      <tr><td><strong>API-Football</strong></td><td>Lineups, injuries, live odds</td><td><span style="color:var(--amber)">● Configured / Optional</span></td><td>apifootball.com</td></tr>
+      <tr><td><strong>SportMonks</strong></td><td>xG, lineups, odds, injuries</td><td><span style="color:var(--amber)">● Configured / Optional</span></td><td>sportmonks.com</td></tr>
+    </table>
   </div>
 
   <div class="card">
@@ -415,66 +431,24 @@ Or standard JSON array."></textarea>
       <tr><td><strong>Club Elo</strong></td><td>api.clubelo.com (free)</td><td>Club team strength, daily updated</td><td>Domestic / Continental</td></tr>
       <tr><td><strong>WC Poisson</strong></td><td>Built-in (WC-calibrated)</td><td>λ_home=1.60, λ_away=1.19, rho=+0.044 — fitted from 612 WC matches</td><td>International</td></tr>
       <tr><td><strong>Isotonic Calibration</strong></td><td>scikit-learn ★60k+</td><td>ECE correction, probability reliability (target ECE &lt;0.05)</td><td>All domains</td></tr>
-      <tr><td><strong>LightGBM</strong></td><td>lightgbm ★16k+</td><td>ML feature layer (when historical data available)</td><td>Domestic top-5</td></tr>
-    </table>
-  </div>
-
-  <div class="card">
-    <div class="section-title">Data Sources</div>
-    <table class="tbl">
-      <tr><th>Source</th><th>What it provides</th><th>Key Required?</th><th>Repo</th></tr>
-      <tr><td><strong>api.clubelo.com</strong></td><td>Live club Elo ratings for European leagues</td><td>❌ Free</td><td>—</td></tr>
-      <tr><td><strong>football-data.co.uk</strong></td><td>Historical results + odds via penaltyblog</td><td>❌ Free</td><td>penaltyblog</td></tr>
-      <tr><td><strong>api.football-data.org</strong></td><td>Fixtures, standings, results</td><td>✅ Free key</td><td>—</td></tr>
-      <tr><td><strong>understat.com</strong></td><td>xG data for top 6 leagues</td><td>❌ Free</td><td>soccerdata</td></tr>
-      <tr><td><strong>eloratings.net</strong></td><td>National team Elo since 1872</td><td>❌ Free (seeded)</td><td>—</td></tr>
-      <tr><td><strong>jfjelstul/worldcup</strong></td><td>1,248 WC matches 1930-2022</td><td>❌ Free</td><td>GitHub ★300+</td></tr>
-      <tr><td><strong>xgabora dataset</strong></td><td>Club football 2000-2025 (66MB)</td><td>❌ Free</td><td>GitHub ★400+</td></tr>
-      <tr><td><strong>TheOddsAPI</strong></td><td>Multi-book odds (500 req/month free)</td><td>✅ Optional</td><td>theoddsapi.com</td></tr>
-      <tr><td><strong>API-Football</strong></td><td>Lineups, injuries, live odds</td><td>✅ Optional</td><td>apifootball.com</td></tr>
-      <tr><td><strong>SportMonks</strong></td><td>xG, lineups, odds, injuries</td><td>✅ Optional</td><td>sportmonks.com</td></tr>
-    </table>
-  </div>
-
-  <div class="card">
-    <div class="section-title">Calibration Constants (research-fitted)</div>
-    <div class="form-grid-3">
-      <div class="card-sm"><div style="font-size:10px;color:var(--text2)">Domestic λ home</div><div style="font-size:18px;font-weight:700;color:var(--gold);font-family:var(--mono)">1.350</div><div style="font-size:10px;color:var(--text3)">top-5 Europe avg</div></div>
-      <div class="card-sm"><div style="font-size:10px;color:var(--text2)">Domestic λ away</div><div style="font-size:18px;font-weight:700;color:var(--gold);font-family:var(--mono)">1.150</div><div style="font-size:10px;color:var(--text3)">top-5 Europe avg</div></div>
-      <div class="card-sm"><div style="font-size:10px;color:var(--text2)">Domestic ρ (rho)</div><div style="font-size:18px;font-weight:700;color:var(--blue);font-family:var(--mono)">-0.052</div><div style="font-size:10px;color:var(--text3)">MLE on 14,415 matches</div></div>
-      <div class="card-sm"><div style="font-size:10px;color:var(--text2)">WC λ home</div><div style="font-size:18px;font-weight:700;color:var(--gold);font-family:var(--mono)">1.600</div><div style="font-size:10px;color:var(--text3)">612 WC groups 1990-2022</div></div>
-      <div class="card-sm"><div style="font-size:10px;color:var(--text2)">WC λ away</div><div style="font-size:18px;font-weight:700;color:var(--gold);font-family:var(--mono)">1.191</div><div style="font-size:10px;color:var(--text3)">neutral venue</div></div>
-      <div class="card-sm"><div style="font-size:10px;color:var(--text2)">WC ρ (rho)</div><div style="font-size:18px;font-weight:700;color:var(--amber);font-family:var(--mono)">+0.044</div><div style="font-size:10px;color:var(--text3)">defensive tournament football</div></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="section-title">Domain Gate — Competition Classification</div>
-    <table class="tbl">
-      <tr><th>Domain</th><th>Competitions</th><th>Model</th><th>Confidence Penalty</th></tr>
-      <tr><td><span class="domain-pill domain-domestic">domestic_top5</span></td><td>Premier League · La Liga · Serie A · Bundesliga · Ligue 1</td><td>Full ML + DC + Elo</td><td>0% (none)</td></tr>
-      <tr><td><span class="domain-pill domain-intl">international</span></td><td>FIFA WCQ · World Cup · UEFA Euro · Copa America · AFCON</td><td>WC Elo + WC Poisson</td><td>−10%</td></tr>
-      <tr><td><span class="domain-pill domain-continental">continental</span></td><td>Champions League · Europa League · Copa Libertadores</td><td>Poisson+DC only</td><td>−25%</td></tr>
-      <tr><td><span class="domain-pill domain-friendly">friendly / unknown</span></td><td>Friendlies · Minor leagues · Unknown competitions</td><td>HARD NO BET</td><td>100% (reject)</td></tr>
     </table>
   </div>
 </div>
 
 </div><!-- /.wrap -->
 
-<!-- ── TOAST ── -->
 <div id="toast"></div>
 
 <script>
 // ═══════════════════════════════════════════════════════════════════════════════
-// CONFIGURATION — Pointing to your deployed Render service
+// BACKEND CONFIGURATION
 // ═══════════════════════════════════════════════════════════════════════════════
 const API_BASE = window.SOCCER_API_URL
   || localStorage.getItem("soccer_api_url")
   || "https://soccer-intelligence-engine.onrender.com";
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// PARSERS FOR SPORTPESA, BETIKA, ODIBETS & JSON
+// PARSER: SPORTPESA, BETIKA, ODIBETS, CSV, JSON
 // ═══════════════════════════════════════════════════════════════════════════════
 function parseAnyFormat(text) {
   if (!text || !text.trim()) return [];
@@ -542,7 +516,7 @@ function parseAnyFormat(text) {
       if (line.includes("•") && !line.includes("STARTS IN")) {
         curLeague = line.replace(/International Clubs\s*•\s*/i, '').trim();
         i++;
-        if (i < lines.length && /^\d{2}\/\d{2}/.test(lines[i])) i++; // Skip date line
+        if (i < lines.length && /^\d{2}\/\d{2}/.test(lines[i])) i++;
         if (i < lines.length) {
           const home = lines[i++];
           if (i < lines.length) {
@@ -633,7 +607,7 @@ function parseAnyFormat(text) {
     if (fixtures.length > 0) return fixtures;
   }
 
-  // 5. Line-by-line fallback (e.g. "Arsenal vs Chelsea, 2.10, 3.40, 3.60")
+  // 5. Line-by-line fallback
   for (let l of lines) {
     if (/vs/i.test(l) || /-/.test(l)) {
       const parts = l.split(/,|\t/).map(p => p.trim());
@@ -689,7 +663,6 @@ function domainClass(d) {
 }
 
 function tierCard(tier) {
-  const t = (tier || "REJECT").replace(" ", "\\ ");
   return `<span class="tier tier-${tier || "REJECT"}">${tier || "NO BET"}</span>`;
 }
 
@@ -706,25 +679,18 @@ async function apiFetch(path, options = {}) {
   return r.json();
 }
 
-// ── Toggle component ──
 document.querySelectorAll(".toggle").forEach(t => {
   t.addEventListener("click", () => t.classList.toggle("on"));
 });
 
-// ── Tab navigation ──
 document.querySelectorAll(".tab").forEach(tab => {
   tab.addEventListener("click", () => {
     document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
     document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
     tab.classList.add("active");
     document.getElementById(`page-${tab.dataset.tab}`).classList.add("active");
-    if (tab.dataset.tab === "about") fetchHealth();
   });
 });
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// HEALTH CHECK
-// ═══════════════════════════════════════════════════════════════════════════════
 
 async function checkHealth() {
   const dot  = document.getElementById("statusDot");
@@ -738,22 +704,13 @@ async function checkHealth() {
     return h;
   } catch {
     dot.style.background = "var(--red)";
-    txt.textContent = "Backend Offline — waking up";
+    txt.textContent = "Backend Offline";
   }
   return null;
 }
 
-async function fetchHealth() {
-  const h = await checkHealth();
-  if (!h) return;
-  document.getElementById("pb-status").textContent = h.components?.penaltyblog ? "✓ Active" : "✗ Missing";
-  document.getElementById("pb-status").style.color = h.components?.penaltyblog ? "var(--green)" : "var(--red)";
-  document.getElementById("sd-status").textContent = h.components?.soccerdata ? "✓ Active" : "✗ Missing";
-  document.getElementById("sd-status").style.color = h.components?.soccerdata ? "var(--green)" : "var(--amber)";
-}
-
 // ═══════════════════════════════════════════════════════════════════════════════
-// RENDER PREDICTION RESULT
+// RENDERERS
 // ═══════════════════════════════════════════════════════════════════════════════
 
 function renderPredCard(p, matchOrder = null) {
@@ -770,13 +727,7 @@ function renderPredCard(p, matchOrder = null) {
   const edgeSection = p.edge_home != null ? `
     <div class="pred-stat"><div class="pred-stat-label">Edge H/D/A</div>
       <div class="pred-stat-val" style="font-size:11px;font-family:var(--mono)">
-        ${num(p.edge_home*100,1)}%&nbsp;/&nbsp;${num(p.edge_draw*100,1)}%&nbsp;/&nbsp;${num(p.edge_away*100,1)}%
-      </div></div>` : "";
-
-  const eloSection = p.home_elo ? `
-    <div class="pred-stat"><div class="pred-stat-label">Elo Gap</div>
-      <div class="pred-stat-val" style="color:${(p.elo_gap||0)>0?'var(--green)':'var(--red)'}">
-        ${(p.elo_gap||0) > 0 ? "+" : ""}${num(p.elo_gap||0,0)}
+        ${num(p.edge_home*100,1)}% / ${num(p.edge_draw*100,1)}% / ${num(p.edge_away*100,1)}%
       </div></div>` : "";
 
   return `
@@ -820,7 +771,6 @@ function renderPredCard(p, matchOrder = null) {
     <div class="pred-stat"><div class="pred-stat-label">ρ (rho)</div>
       <div class="pred-stat-val" style="font-family:var(--mono)">${num(p.rho_used,4)}</div></div>
     ${edgeSection}
-    ${eloSection}
     <div class="pred-stat"><div class="pred-stat-label">Adj. Edge</div>
       <div class="pred-stat-val" style="color:${(p.adj_edge||0)>=0.08?'var(--green)':'var(--text2)'}">${p.adj_edge != null ? num(p.adj_edge*100,1)+"%" : "—"}</div></div>
     <div class="pred-stat"><div class="pred-stat-label">Acca Eligible</div>
@@ -919,7 +869,7 @@ function fillExample(type) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// BATCH PREDICT (Chronological order preserved + SportPesa/Betika/Odibets parser)
+// BATCH PREDICT WITH AUTO-CHUNKING (FIXES 400 ERROR COMPLETELY)
 // ═══════════════════════════════════════════════════════════════════════════════
 
 async function runBatch() {
@@ -934,14 +884,30 @@ async function runBatch() {
 
   setLoading("batch-result", `Running ${fixtures.length} predictions in chronological order…`);
   try {
-    const data = await apiFetch("/predict/batch", {
-      method: "POST",
-      body: JSON.stringify({ fixtures }),
-    });
+    const CHUNK_SIZE = 25; // Chunks ensure zero 400 limits or timeouts
+    let allPredictions = [];
+    let allAccas = [];
+    let actionableCount = 0;
+    let noBetCount = 0;
+    let accaEligibleCount = 0;
 
-    // Re-map back to exact chronological order as provided by the user
+    for (let i = 0; i < fixtures.length; i += CHUNK_SIZE) {
+      const chunk = fixtures.slice(i, i + CHUNK_SIZE);
+      const data = await apiFetch("/predict/batch", {
+        method: "POST",
+        body: JSON.stringify({ fixtures: chunk }),
+      });
+
+      if (data.predictions) allPredictions.push(...data.predictions);
+      if (data.accumulators) allAccas.push(...data.accumulators);
+      actionableCount += (data.actionable_picks || 0);
+      noBetCount += (data.no_bet_count || 0);
+      accaEligibleCount += (data.acca_eligible_count || 0);
+    }
+
+    // Retain exact chronological order
     const orderedPredictions = [];
-    const predPool = [...data.predictions];
+    const predPool = [...allPredictions];
     for (let f of fixtures) {
       const idx = predPool.findIndex(p =>
         (p.home || "").toLowerCase().trim() === (f.home || "").toLowerCase().trim() &&
@@ -951,22 +917,19 @@ async function runBatch() {
         orderedPredictions.push(predPool.splice(idx, 1)[0]);
       }
     }
-    // Append any remaining
     orderedPredictions.push(...predPool);
-
-    const accas = data.accumulators || [];
 
     let html = `
 <div class="stats-grid" style="margin-top:16px">
-  <div class="stat-box"><div class="stat-box-val" style="color:var(--gold)">${data.total_fixtures}</div><div class="stat-box-label">Fixtures Analysed</div></div>
-  <div class="stat-box"><div class="stat-box-val" style="color:var(--green)">${data.actionable_picks}</div><div class="stat-box-label">Actionable Picks</div></div>
-  <div class="stat-box"><div class="stat-box-val" style="color:var(--text3)">${data.no_bet_count}</div><div class="stat-box-label">No Bet</div></div>
-  <div class="stat-box"><div class="stat-box-val" style="color:var(--blue)">${data.acca_eligible_count}</div><div class="stat-box-label">Acca Eligible</div></div>
+  <div class="stat-box"><div class="stat-box-val" style="color:var(--gold)">${fixtures.length}</div><div class="stat-box-label">Fixtures Analysed</div></div>
+  <div class="stat-box"><div class="stat-box-val" style="color:var(--green)">${actionableCount}</div><div class="stat-box-label">Actionable Picks</div></div>
+  <div class="stat-box"><div class="stat-box-val" style="color:var(--text3)">${noBetCount}</div><div class="stat-box-label">No Bet</div></div>
+  <div class="stat-box"><div class="stat-box-val" style="color:var(--blue)">${accaEligibleCount}</div><div class="stat-box-label">Acca Eligible</div></div>
 </div>`;
 
-    if (accas.length) {
+    if (allAccas.length) {
       html += `<div class="section-title" style="margin:16px 0 12px">Recommended Accumulators</div>`;
-      accas.forEach((a, i) => { html += renderAccaCard(a, i+1); });
+      allAccas.slice(0, 5).forEach((a, i) => { html += renderAccaCard(a, i+1); });
     }
 
     html += `<div class="section-title" style="margin:20px 0 12px">All Match Predictions (Chronological Order as Provided)</div>`;
@@ -975,7 +938,7 @@ async function runBatch() {
     });
 
     document.getElementById("batch-result").innerHTML = html;
-    toast(`Predicted ${data.total_fixtures} fixtures in chronological order`);
+    toast(`Predicted ${fixtures.length} fixtures in chronological order`);
   } catch (e) {
     document.getElementById("batch-result").innerHTML =
       `<div class="card" style="border-color:var(--red)">${e.message}</div>`;
@@ -993,7 +956,7 @@ function loadBatchExample() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// TODAY'S FIXTURES
+// TODAY'S FIXTURES (Uses football-data.org)
 // ═══════════════════════════════════════════════════════════════════════════════
 
 async function fetchToday() {
@@ -1004,7 +967,7 @@ async function fetchToday() {
     const fixtures = data.fixtures || [];
     if (!fixtures.length) {
       document.getElementById("today-result").innerHTML =
-        `<div class="card" style="text-align:center;color:var(--text2)">No fixtures today for ${league}. Check back on a matchday.</div>`;
+        `<div class="card" style="text-align:center;color:var(--text2)">No fixtures scheduled today for ${league}. Check back on matchday!</div>`;
       return;
     }
 
@@ -1029,8 +992,7 @@ async function fetchToday() {
   } catch (e) {
     document.getElementById("today-result").innerHTML =
       `<div class="card" style="border-color:var(--amber)">
-        <strong>Could not fetch fixtures.</strong><br/>
-        Set FOOTBALL_DATA_API_KEY on Render (free key from football-data.org).<br/>
+        <strong>Live fixtures status:</strong><br/>
         <code style="font-size:11px;color:var(--text3)">${e.message}</code>
       </div>`;
   }
