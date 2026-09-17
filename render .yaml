@@ -1,0 +1,31 @@
+# render.yaml — Auto-deploy configuration for Render
+# Docs: https://render.com/docs/render-yaml-file
+
+services:
+  - type: web
+    name: soccer-engine
+    runtime: python
+    region: oregon          # closest to most users; change to frankfurt for EU
+    plan: free              # upgrade to starter ($7/mo) for always-on + more RAM
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn main:app -w 1 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT --timeout 120
+    healthCheckPath: /health
+
+    envVars:
+      # ── Required for fixtures endpoint ──────────────────────────────────────
+      - key: FOOTBALL_DATA_API_KEY
+        sync: false         # set manually in Render dashboard (free key)
+
+      # ── Optional — unlock odds, lineups, injuries ────────────────────────────
+      - key: THE_ODDS_API_KEY
+        sync: false         # theoddsapi.com — 500 req/month free
+      - key: API_FOOTBALL_KEY
+        sync: false         # apifootball.com — live lineups + injuries
+      - key: SPORTMONKS_KEY
+        sync: false         # sportmonks.com — xG + lineups
+
+      # ── Storage paths (writable on Render) ──────────────────────────────────
+      - key: CACHE_DIR
+        value: /tmp/soccer_cache
+      - key: MODEL_DIR
+        value: /tmp/soccer_models

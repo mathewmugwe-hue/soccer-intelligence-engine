@@ -1,0 +1,46 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# SOCCER INTELLIGENCE ENGINE — RENDER DEPLOYMENT REQUIREMENTS
+# Zero LLM · Pure Mathematics · Calibrated Statistics
+#
+# Core repos used:
+#   penaltyblog  ★900+ — Dixon-Coles, Bivariate Poisson, Elo, Pi Ratings (Cython)
+#   soccerdata   ★1.7k — Club Elo, FBref, Football-Data.co.uk, Understat scrapers
+#   scikit-learn ★60k+ — Isotonic calibration, metrics
+#   lightgbm     ★16k+ — Gradient boosting ML layer
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ── Core prediction engine ────────────────────────────────────────────────────
+penaltyblog>=1.10.0          # Dixon-Coles, Bivariate Poisson, Elo, Pi Ratings
+soccerdata>=1.9.0            # Club Elo, Football-Data.co.uk, Understat scrapers
+
+# ── API framework ─────────────────────────────────────────────────────────────
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+python-multipart>=0.0.12
+
+# ── Data processing ───────────────────────────────────────────────────────────
+pandas>=2.2.0
+numpy>=1.26.0
+scipy>=1.13.0
+
+# ── Machine learning ──────────────────────────────────────────────────────────
+scikit-learn>=1.5.0          # Isotonic calibration, Brier/log-loss metrics
+lightgbm>=4.5.0              # Primary gradient boosting model
+# catboost>=1.2.0            # Uncomment if RAM allows (Render free=512MB)
+
+# ── HTTP / data fetching ──────────────────────────────────────────────────────
+requests>=2.32.0
+httpx>=0.27.0                # Async HTTP for concurrent data fetching
+aiohttp>=3.10.0
+
+# ── Caching & storage ────────────────────────────────────────────────────────
+diskcache>=5.6.0             # Persistent disk cache (survives dyno restarts)
+
+# ── Utilities ────────────────────────────────────────────────────────────────
+python-dotenv>=1.0.0         # .env file support for API keys
+pydantic>=2.9.0              # Request/response validation (included in FastAPI)
+joblib>=1.4.0                # Model serialisation
+pytz>=2024.1                 # Timezone handling for kickoff times
+
+# ── Render compatibility ──────────────────────────────────────────────────────
+gunicorn>=23.0.0             # Production WSGI server on Render
