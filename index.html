@@ -3,626 +3,292 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Soccer Intelligence Engine</title>
+<title>Soccer Intelligence Engine v4.0</title>
 <style>
-/* ═══════════════════════════════════════════════════════════════
-   SOCCER INTELLIGENCE ENGINE  v3.2  —  VERCEL FRONTEND
-   Zero LLM · Pure Mathematics · Calibrated Predictions
-   SportPesa · Betika · Odibets Universal Parsing
-═══════════════════════════════════════════════════════════════ */
 :root{
-  --bg:#0D0F14;--bg2:#13161E;--bg3:#1A1D27;--bg4:#21253A;
-  --border:#2A2D3E;--border2:#353850;
-  --gold:#F0B429;--gold2:#D4971F;
-  --blue:#3B82F6;--blue2:#2563EB;--blue3:#1D4ED8;
-  --green:#22C55E;--green2:#16A34A;
-  --red:#EF4444;--red2:#DC2626;
-  --amber:#F59E0B;--amber2:#D97706;
-  --purple:#A855F7;
-  --text:#F1F3F9;--text2:#9CA3AF;--text3:#6B7280;
+  --bg:#0B0E14;--bg2:#121620;--bg3:#1A1F2C;--bg4:#242B3D;
+  --border:#2A3245;--border2:#3A455E;
+  --gold:#F59E0B;--gold2:#D97706;
+  --blue:#3B82F6;--blue2:#2563EB;
+  --green:#10B981;--green2:#059669;
+  --red:#EF4444;--amber:#F59E0B;
+  --text:#F3F4F6;--text2:#9CA3AF;--text3:#6B7280;
   --radius:10px;--radius2:6px;
-  --font:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --mono:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{
-  background:var(--bg);
-  color:var(--text);
-  font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-  min-height:100vh;
-  line-height:1.5;
-}
-
-/* ── Layout ── */
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;line-height:1.5}
 .wrap{max-width:1200px;margin:0 auto;padding:0 16px}
-
-/* ── Header ── */
-header{background:var(--bg2);border-bottom:1px solid var(--border);padding:0}
-.header-inner{display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px}
+header{background:var(--bg2);border-bottom:1px solid var(--border)}
+.header-inner{display:flex;align-items:center;justify-content:space-between;height:60px}
 .logo{display:flex;align-items:center;gap:10px}
 .logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--gold),var(--gold2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
-.logo-text{font-size:16px;font-weight:700;color:var(--text);letter-spacing:-.3px}
-.logo-sub{font-size:11px;color:var(--text2);margin-top:1px}
+.logo-text{font-size:16px;font-weight:700;color:var(--text)}
+.logo-sub{font-size:11px;color:var(--text2)}
 .header-status{display:flex;align-items:center;gap:8px}
 .status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .status-text{font-size:12px;color:var(--text2)}
-.api-url-badge{font-size:11px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius2);padding:3px 8px;font-family:var(--mono)}
-
-/* ── Tabs ── */
-.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--bg2);overflow-x:auto}
-.tab{padding:12px 20px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s}
+.api-badge{font-size:11px;color:var(--text2);background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius2);padding:4px 8px;cursor:pointer}
+.tabs{display:flex;border-bottom:1px solid var(--border);background:var(--bg2)}
+.tab{padding:12px 20px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent}
 .tab:hover{color:var(--text)}
 .tab.active{color:var(--gold);border-bottom-color:var(--gold)}
-
-/* ── Page sections ── */
 .page{display:none;padding:24px 0}
 .page.active{display:block}
-
-/* ── Cards ── */
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px}
-.card-sm{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius2);padding:12px 14px}
-
-/* ── Section titles ── */
 .section-title{font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .section-title::after{content:'';flex:1;height:1px;background:var(--border)}
-
-/* ── Form elements ── */
 label{display:block;font-size:12px;font-weight:500;color:var(--text2);margin-bottom:5px}
-input,select,textarea{
-  width:100%;
-  background:var(--bg3);
-  border:1px solid var(--border);
-  color:var(--text);
-  border-radius:var(--radius2);
-  padding:9px 12px;
-  font-size:13px;
-  font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-  outline:none;
-  transition:border .15s;
-}
-input:focus,select:focus{border-color:var(--blue)}
-input::placeholder{color:var(--text3)}
-select option{background:var(--bg3)}
-
+input,select,textarea{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:var(--radius2);padding:9px 12px;font-size:13px;font-family:inherit;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--blue)}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-.form-group{margin-bottom:0}
 @media(max-width:640px){.form-grid,.form-grid-3{grid-template-columns:1fr}}
-
-/* ── Buttons ── */
-.btn{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:6px;
-  padding:9px 18px;
-  border-radius:var(--radius2);
-  font-size:13px;
-  font-weight:600;
-  cursor:pointer;
-  border:none;
-  transition:all .15s;
-  font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 18px;border-radius:var(--radius2);font-size:13px;font-weight:600;cursor:pointer;border:none}
 .btn-primary{background:var(--gold);color:#0D0F14}
 .btn-primary:hover{background:var(--gold2)}
 .btn-secondary{background:var(--bg3);color:var(--text);border:1px solid var(--border)}
-.btn-secondary:hover{background:var(--bg4);border-color:var(--border2)}
 .btn-sm{padding:6px 12px;font-size:12px}
-.btn:disabled{opacity:.4;cursor:not-allowed}
-.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
-
-/* ── Tier badges ── */
-.tier{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
-.tier-ELITE{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.3)}
+.btn-row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.tier{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.tier-ELITE{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.3)}
 .tier-STRONG{background:rgba(59,130,246,.15);color:var(--blue);border:1px solid rgba(59,130,246,.3)}
 .tier-CANDIDATE{background:rgba(245,158,11,.15);color:var(--amber);border:1px solid rgba(245,158,11,.3)}
-.tier-REJECT,
 .tier-NO\ BET{background:var(--bg3);color:var(--text3);border:1px solid var(--border)}
-
-/* ── Prediction card ── */
 .pred-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:12px}
-.pred-card.elite{border-left:3px solid var(--green)}
-.pred-card.strong{border-left:3px solid var(--blue)}
-.pred-card.candidate{border-left:3px solid var(--amber)}
-.pred-card.no-bet{border-left:3px solid var(--border);opacity:.85}
+.pred-card.elite{border-left:4px solid var(--green)}
+.pred-card.strong{border-left:4px solid var(--blue)}
+.pred-card.candidate{border-left:4px solid var(--amber)}
+.pred-card.no-bet{border-left:4px solid var(--border);opacity:.8}
 .pred-header{display:flex;justify-content:space-between;align-items:flex-start;padding:14px 16px 10px;gap:12px}
 .pred-teams{font-size:15px;font-weight:700}
 .pred-meta{font-size:11px;color:var(--text2);margin-top:2px}
 .pred-pick{text-align:right}
-.pred-pick-label{font-size:10px;color:var(--text2);margin-bottom:2px}
-.pred-pick-val{font-size:16px;font-weight:700}
-.pred-body{padding:0 16px 14px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.pred-pick-val{font-size:15px;font-weight:700}
+.prob-bar{display:flex;height:6px;border-radius:3px;overflow:hidden;margin:10px 16px 0;gap:1px}
+.pb-h{background:var(--blue)}
+.pb-d{background:var(--text3)}
+.pb-a{background:var(--red)}
+.prob-labels{display:flex;justify-content:space-between;padding:4px 16px 10px;font-size:11px;color:var(--text2)}
+.pred-body{padding:0 16px 12px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 @media(max-width:600px){.pred-body{grid-template-columns:repeat(2,1fr)}}
 .pred-stat{background:var(--bg3);border-radius:var(--radius2);padding:8px 10px;text-align:center}
-.pred-stat-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
-.pred-stat-val{font-size:14px;font-weight:600;margin-top:2px}
-.prob-bar{display:flex;height:6px;border-radius:3px;overflow:hidden;margin:10px 16px 0;gap:1px}
-.pb-h{background:var(--blue);transition:width .4s}
-.pb-d{background:var(--text3);transition:width .4s}
-.pb-a{background:var(--red);transition:width .4s}
-.prob-labels{display:flex;justify-content:space-between;padding:4px 16px 12px;font-size:11px;color:var(--text2)}
-.pred-reason{padding:8px 16px 12px;font-size:11px;color:var(--text3);border-top:1px solid var(--border);line-height:1.5}
-
-/* ── Acca card ── */
-.acca-card{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:16px;margin-bottom:12px}
-.acca-card.best{border-color:rgba(34,197,94,.4);background:rgba(34,197,94,.04)}
+.pred-stat-label{font-size:9px;color:var(--text3);text-transform:uppercase}
+.pred-stat-val{font-size:13px;font-weight:600;margin-top:2px}
+.pred-reason{padding:8px 16px 12px;font-size:11px;color:var(--text3);border-top:1px solid var(--border)}
+.acca-card{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:16px;margin-bottom:14px}
+.acca-card.banker{border-color:rgba(16,185,129,.4);background:rgba(16,185,129,.03)}
 .acca-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.acca-title{font-size:13px;font-weight:600}
-.acca-odds{font-size:22px;font-weight:700;color:var(--blue)}
-.acca-meta{font-size:11px;color:var(--text2)}
-.acca-leg{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px}
+.acca-title{font-size:14px;font-weight:700}
+.acca-odds{font-size:22px;font-weight:700;color:var(--gold)}
+.acca-leg{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
 .acca-leg:last-child{border-bottom:none}
-.leg-num{width:20px;height:20px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0}
-.leg-teams{flex:1}
-.leg-odds{font-family:var(--mono);font-size:12px;color:var(--gold)}
-
-/* ── Stats grid ── */
+.leg-num{width:20px;height:20px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:10px}
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
 @media(max-width:600px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
 .stat-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center}
 .stat-box-val{font-size:24px;font-weight:700;margin-bottom:2px}
 .stat-box-label{font-size:11px;color:var(--text2)}
-.stat-box-sub{font-size:10px;color:var(--text3);margin-top:2px}
-
-/* ── Table ── */
-.tbl{width:100%;border-collapse:collapse;font-size:12px}
-.tbl th{text-align:left;padding:8px 10px;color:var(--text2);font-weight:500;border-bottom:1px solid var(--border);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
-.tbl td{padding:9px 10px;border-bottom:1px solid var(--border)}
-.tbl tr:last-child td{border-bottom:none}
-.tbl tr:hover td{background:var(--bg3)}
-
-/* ── Loading ── */
 .loading{display:flex;align-items:center;justify-content:center;gap:10px;padding:40px;color:var(--text2)}
 .spinner{width:20px;height:20px;border:2px solid var(--border2);border-top-color:var(--gold);border-radius:50%;animation:spin .6s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* ── Toast ── */
 #toast{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
-.toast-item{background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:10px 16px;border-radius:var(--radius);font-size:13px;animation:slideIn .2s ease;display:flex;align-items:center;gap:8px;max-width:320px}
-.toast-item.success{border-left:3px solid var(--green)}
-.toast-item.error{border-left:3px solid var(--red)}
-@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:none;opacity:1}}
-
-/* ── Elo gauge ── */
-.elo-bar{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;margin:4px 0}
-.elo-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--red),var(--amber),var(--green));transition:width .5s}
-
-/* ── Inline toggle ── */
-.toggle-row{display:flex;align-items:center;gap:10px}
-.toggle{width:36px;height:20px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;cursor:pointer;position:relative;transition:background .2s}
-.toggle.on{background:var(--green)}
-.toggle::after{content:'';width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:transform .2s}
-.toggle.on::after{transform:translateX(16px)}
-
-/* ── Domain pill ── */
-.domain-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500;border:1px solid}
-.domain-domestic{background:rgba(59,130,246,.1);color:var(--blue);border-color:rgba(59,130,246,.3)}
-.domain-intl{background:rgba(245,158,11,.1);color:var(--amber);border-color:rgba(245,158,11,.3)}
-.domain-continental{background:rgba(168,85,247,.1);color:var(--purple);border-color:rgba(168,85,247,.3)}
-.domain-friendly{background:var(--bg3);color:var(--text3);border-color:var(--border)}
-
-@media(max-width:768px){
-  .header-inner{flex-wrap:wrap;height:auto;padding:10px 0}
-  .api-url-badge{display:none}
-  .pred-body{grid-template-columns:repeat(2,1fr)}
-  .stats-grid{grid-template-columns:repeat(2,1fr)}
-}
+.toast-item{background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:10px 16px;border-radius:var(--radius);font-size:13px}
 </style>
 </head>
 <body>
 
-<!-- ── HEADER ── -->
 <header>
 <div class="wrap">
 <div class="header-inner">
   <div class="logo">
     <div class="logo-icon">⚽</div>
     <div>
-      <div class="logo-text">Soccer Intelligence Engine</div>
-      <div class="logo-sub">Pure Mathematics · Zero LLM · Calibrated Probabilities</div>
+      <div class="logo-text">Soccer Intelligence Engine v4.0</div>
+      <div class="logo-sub">Quantitative · De-vigged Odds · Multi-Market Double Chance</div>
     </div>
   </div>
   <div class="header-status">
     <div class="status-dot" id="statusDot"></div>
     <div class="status-text" id="statusText">Connecting…</div>
-    <div class="api-url-badge" id="apiUrlBadge">—</div>
+    <div class="api-badge" id="apiBadge" onclick="changeApiUrl()" title="Click to edit backend URL">Configure URL</div>
   </div>
 </div>
 </div>
 </header>
 
-<!-- ── TABS ── -->
-<div class="tabs wrap" style="max-width:none;padding:0 16px">
-  <div class="wrap" style="display:flex;gap:0;padding:0">
-    <div class="tab active" data-tab="predict">Predict</div>
-    <div class="tab" data-tab="batch">Batch + Accas</div>
-    <div class="tab" data-tab="today">Today's Fixtures</div>
-    <div class="tab" data-tab="elo">Team Elo</div>
-    <div class="tab" data-tab="about">Model & Data Sources</div>
-  </div>
+<div class="tabs wrap">
+  <div class="tab active" data-tab="batch">Batch Fixtures & Accas</div>
+  <div class="tab" data-tab="predict">Single Fixture</div>
+  <div class="tab" data-tab="today">Today's Matches</div>
 </div>
 
 <div class="wrap">
 
-<!-- ══════════════════════════════════════════════════════════════
-     PAGE: PREDICT (Single fixture)
-══════════════════════════════════════════════════════════════ -->
-<div class="page active" id="page-predict">
-  <div class="card">
-    <div class="section-title">Fixture Input</div>
-    <div class="form-grid">
-      <div class="form-group">
-        <label>Home Team</label>
-        <input id="p-home" placeholder="e.g. Arsenal" autocomplete="off"/>
-      </div>
-      <div class="form-group">
-        <label>Away Team</label>
-        <input id="p-away" placeholder="e.g. Chelsea" autocomplete="off"/>
-      </div>
-    </div>
-    <div class="form-grid" style="margin-top:12px">
-      <div class="form-group">
-        <label>Competition / League</label>
-        <input id="p-league" placeholder="e.g. Premier League" value="Premier League"/>
-      </div>
-      <div class="form-group">
-        <label>Match Date (optional)</label>
-        <input id="p-date" type="date"/>
-      </div>
-    </div>
-
-    <div class="section-title" style="margin-top:18px">Bookmaker Odds (optional — enables edge calculation)</div>
-    <div class="form-grid-3">
-      <div class="form-group">
-        <label>Home Win Odds</label>
-        <input id="p-oh" type="number" step="0.01" min="1.01" placeholder="e.g. 2.10"/>
-      </div>
-      <div class="form-group">
-        <label>Draw Odds</label>
-        <input id="p-od" type="number" step="0.01" min="1.01" placeholder="e.g. 3.40"/>
-      </div>
-      <div class="form-group">
-        <label>Away Win Odds</label>
-        <input id="p-oa" type="number" step="0.01" min="1.01" placeholder="e.g. 3.60"/>
-      </div>
-    </div>
-
-    <div style="display:flex;align-items:center;gap:20px;margin-top:14px;flex-wrap:wrap">
-      <div class="toggle-row">
-        <div class="toggle" id="p-neutral" title="Neutral venue"></div>
-        <label style="margin:0;cursor:pointer" onclick="document.getElementById('p-neutral').click()">Neutral venue</label>
-      </div>
-      <div class="form-group" style="display:flex;align-items:center;gap:8px">
-        <label style="margin:0">Phase:</label>
-        <select id="p-phase" style="width:auto">
-          <option value="league">League</option>
-          <option value="group">WC Group Stage</option>
-          <option value="knockout">WC Knockout</option>
-          <option value="quarter">Quarter-Final</option>
-          <option value="semi">Semi-Final</option>
-          <option value="final">Final</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn btn-primary" onclick="runSinglePredict()">⚽ Predict Match</button>
-      <button class="btn btn-secondary btn-sm" onclick="fillExample('domestic')">PL Example</button>
-      <button class="btn btn-secondary btn-sm" onclick="fillExample('wc')">WC Example</button>
-    </div>
-  </div>
-
-  <div id="single-result"></div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════════
-     PAGE: BATCH + ACCAS (SportPesa, Betika, Odibets)
-══════════════════════════════════════════════════════════════ -->
-<div class="page" id="page-batch">
-  <div class="card">
-    <div class="section-title">Batch Fixture Input</div>
-    <p style="font-size:13px;color:var(--text2);margin-bottom:12px">
-      Paste matches directly from <strong>SportPesa</strong>, <strong>Betika</strong>, <strong>Odibets</strong>, or enter as a JSON array. Matches will be processed in the <strong>exact chronological order</strong> you provide.
+<!-- ── BATCH & ACCAS ── -->
+<div class="page active" id="page-batch">
+  <div class="card" style="margin-top:20px">
+    <div class="section-title">Batch Slip Input (SportPesa · Betika · Odibets Universal)</div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:12px">
+      Paste directly from <strong>SportPesa</strong>, <strong>Betika</strong>, <strong>Odibets</strong>, CSV, or raw lists. The engine applies <strong>Shin Power De-vigging</strong> and <strong>Reverse Elo Imputation</strong> to prevent underdog traps.
     </p>
-    <textarea id="batch-json" rows="12" style="font-family:var(--mono);font-size:12px" placeholder="Paste directly from:
-- SportPesa (e.g. OFI Crete vs TSG Hoffenheim...)
-- Betika (e.g. England • EFL Cup / Man City vs Norwich...)
-- Odibets (e.g. 17/09/26 - 22:00 | ID: 3673 / Juventus vs NEC Nijmegen...)
-Or standard JSON array."></textarea>
+    <textarea id="batch-input" rows="10" placeholder="Paste your slip text directly here. Examples:
+- Betika: England • EFL Cup / Man City vs Norwich / 1.15 7.50 18.00
+- SportPesa: #4928 / Real Madrid vs Espanyol / 1 1.25 X 6.20 2 11.00
+- Odibets: ID: 3673 / Juventus vs Nec Nijmegen / Home 1.18 Draw 7.00 Away 15.00
+- Raw: Arsenal vs Chelsea 2.10 3.40 3.50"></textarea>
     <div class="btn-row">
-      <button class="btn btn-primary" onclick="runBatch()">⚽ Predict All + Build Accas</button>
-      <button class="btn btn-secondary btn-sm" onclick="loadBatchExample()">Load Example Card</button>
+      <button class="btn btn-primary" onclick="runBatch()">⚽ Predict All & Build Safe Accas</button>
+      <button class="btn btn-secondary btn-sm" onclick="loadSample()">Load Sample Slip</button>
     </div>
   </div>
-  <div id="batch-result"></div>
+  <div id="batch-output"></div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════════
-     PAGE: TODAY'S FIXTURES
-══════════════════════════════════════════════════════════════ -->
+<!-- ── SINGLE PREDICT ── -->
+<div class="page" id="page-predict">
+  <div class="card" style="margin-top:20px">
+    <div class="section-title">Single Match Analysis</div>
+    <div class="form-grid">
+      <div><label>Home Team</label><input id="sp-home" placeholder="e.g. Juventus"/></div>
+      <div><label>Away Team</label><input id="sp-away" placeholder="e.g. Nec Nijmegen"/></div>
+    </div>
+    <div class="form-grid-3" style="margin-top:12px">
+      <div><label>Home Odds (1)</label><input id="sp-oh" type="number" step="0.01" placeholder="1.18"/></div>
+      <div><label>Draw Odds (X)</label><input id="sp-od" type="number" step="0.01" placeholder="6.50"/></div>
+      <div><label>Away Odds (2)</label><input id="sp-oa" type="number" step="0.01" placeholder="14.00"/></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="runSingle()">Predict Single Match</button>
+    </div>
+  </div>
+  <div id="single-output"></div>
+</div>
+
+<!-- ── TODAY'S FIXTURES ── -->
 <div class="page" id="page-today">
-  <div class="card">
-    <div class="section-title">Fetch Today's Fixtures</div>
-    <p style="font-size:13px;color:var(--text2);margin-bottom:12px">
-      Live scheduled fixtures from <strong>football-data.org</strong> using active authenticated key.
-    </p>
-    <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
-      <div style="flex:1;min-width:140px">
-        <label>League</label>
-        <select id="today-league">
-          <option value="PL">Premier League</option>
-          <option value="PD">La Liga</option>
-          <option value="SA">Serie A</option>
-          <option value="BL1">Bundesliga</option>
-          <option value="FL1">Ligue 1</option>
-          <option value="CL">Champions League</option>
-        </select>
-      </div>
-      <button class="btn btn-primary" onclick="fetchToday()">Fetch Fixtures</button>
+  <div class="card" style="margin-top:20px">
+    <div class="section-title">Fetch Live Scheduled Matches</div>
+    <div style="display:flex;gap:10px">
+      <select id="live-league" style="max-width:200px">
+        <option value="PL">Premier League</option>
+        <option value="CL">Champions League</option>
+        <option value="PD">La Liga</option>
+        <option value="SA">Serie A</option>
+        <option value="BL1">Bundesliga</option>
+      </select>
+      <button class="btn btn-primary" onclick="fetchToday()">Fetch Matches</button>
     </div>
   </div>
-  <div id="today-result"></div>
+  <div id="today-output"></div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════════
-     PAGE: ELO LOOKUP
-══════════════════════════════════════════════════════════════ -->
-<div class="page" id="page-elo">
-  <div class="card">
-    <div class="section-title">Team Elo Lookup</div>
-    <div class="form-grid">
-      <div>
-        <label>Team Name</label>
-        <input id="elo-team" placeholder="e.g. Arsenal, France, Bayern Munich"/>
-      </div>
-      <div>
-        <label>Type</label>
-        <select id="elo-type">
-          <option value="false">Club (api.clubelo.com)</option>
-          <option value="true">International (eloratings.net)</option>
-        </select>
-      </div>
-    </div>
-    <div class="btn-row">
-      <button class="btn btn-primary" onclick="fetchElo()">Lookup Elo</button>
-    </div>
-  </div>
-  <div id="elo-result"></div>
 </div>
-
-<!-- ══════════════════════════════════════════════════════════════
-     PAGE: MODEL & DATA SOURCES
-══════════════════════════════════════════════════════════════ -->
-<div class="page" id="page-about">
-  <div class="stats-grid" id="health-stats">
-    <div class="stat-box"><div class="stat-box-val" style="color:var(--gold)">3.2.0</div><div class="stat-box-label">Engine Version</div></div>
-    <div class="stat-box"><div class="stat-box-val" style="color:var(--green)">0 LLM</div><div class="stat-box-label">AI Hallucinations</div><div class="stat-box-sub">Pure mathematics only</div></div>
-    <div class="stat-box"><div class="stat-box-val" id="pb-status" style="color:var(--green)">✓ Active</div><div class="stat-box-label">penaltyblog ★900+</div></div>
-    <div class="stat-box"><div class="stat-box-val" id="sd-status" style="color:var(--green)">✓ Active</div><div class="stat-box-label">soccerdata ★1.7k</div></div>
-  </div>
-
-  <div class="card">
-    <div class="section-title">Data Sources & Key Connectivity</div>
-    <table class="tbl" id="data-sources-tbl">
-      <tr><th>Source</th><th>What it provides</th><th>Key Status</th><th>Repo / URL</th></tr>
-      <tr><td><strong>api.clubelo.com</strong></td><td>Live club Elo ratings for European leagues</td><td><span style="color:var(--green)">✓ Active (Free)</span></td><td>api.clubelo.com</td></tr>
-      <tr><td><strong>football-data.co.uk</strong></td><td>Historical results + odds via penaltyblog</td><td><span style="color:var(--green)">✓ Active (Free)</span></td><td>penaltyblog</td></tr>
-      <tr><td><strong>api.football-data.org</strong></td><td>Fixtures, standings, results</td><td><span style="color:var(--green)">✓ Active Key Configured</span></td><td>football-data.org</td></tr>
-      <tr><td><strong>understat.com</strong></td><td>xG data for top 6 leagues</td><td><span style="color:var(--green)">✓ Active (Free)</span></td><td>soccerdata</td></tr>
-      <tr><td><strong>eloratings.net</strong></td><td>National team Elo since 1872</td><td><span style="color:var(--green)">✓ Active (Seeded)</span></td><td>eloratings.net</td></tr>
-      <tr><td><strong>jfjelstul/worldcup</strong></td><td>1,248 WC matches 1930-2022</td><td><span style="color:var(--green)">✓ Active (Free)</span></td><td>GitHub ★300+</td></tr>
-      <tr><td><strong>xgabora dataset</strong></td><td>Club football 2000-2025 (66MB)</td><td><span style="color:var(--green)">✓ Active (Free)</span></td><td>GitHub ★400+</td></tr>
-      <tr><td><strong>TheOddsAPI</strong></td><td>Multi-book odds (500 req/month free)</td><td><span style="color:var(--green)">✓ Active Key Configured</span></td><td>theoddsapi.com</td></tr>
-      <tr><td><strong>API-Football</strong></td><td>Lineups, injuries, live odds</td><td><span style="color:var(--amber)">● Configured / Optional</span></td><td>apifootball.com</td></tr>
-      <tr><td><strong>SportMonks</strong></td><td>xG, lineups, odds, injuries</td><td><span style="color:var(--amber)">● Configured / Optional</span></td><td>sportmonks.com</td></tr>
-    </table>
-  </div>
-
-  <div class="card">
-    <div class="section-title">Statistical Models Used</div>
-    <table class="tbl">
-      <tr><th>Model</th><th>Library</th><th>Purpose</th><th>Domain</th></tr>
-      <tr><td><strong>Dixon-Coles (time-weighted)</strong></td><td>penaltyblog ★900+</td><td>Goal expectancy, low-score correction, attack/defense fitting</td><td>Domestic top-5</td></tr>
-      <tr><td><strong>Bivariate Poisson</strong></td><td>penaltyblog ★900+</td><td>Joint home/away goal modelling — superior to independent Poisson</td><td>Domestic top-5</td></tr>
-      <tr><td><strong>International Elo</strong></td><td>Built-in (eloratings.net seeded)</td><td>National team strength — separate from club Elo, K=40, neutral HFA=0</td><td>International</td></tr>
-      <tr><td><strong>Club Elo</strong></td><td>api.clubelo.com (free)</td><td>Club team strength, daily updated</td><td>Domestic / Continental</td></tr>
-      <tr><td><strong>WC Poisson</strong></td><td>Built-in (WC-calibrated)</td><td>λ_home=1.60, λ_away=1.19, rho=+0.044 — fitted from 612 WC matches</td><td>International</td></tr>
-      <tr><td><strong>Isotonic Calibration</strong></td><td>scikit-learn ★60k+</td><td>ECE correction, probability reliability (target ECE &lt;0.05)</td><td>All domains</td></tr>
-    </table>
-  </div>
-</div>
-
-</div><!-- /.wrap -->
-
 <div id="toast"></div>
 
 <script>
-// ═══════════════════════════════════════════════════════════════════════════════
-// BACKEND CONFIGURATION
-// ═══════════════════════════════════════════════════════════════════════════════
-const API_BASE = window.SOCCER_API_URL
-  || localStorage.getItem("soccer_api_url")
-  || "https://soccer-intelligence-engine.onrender.com";
+let API_BASE = localStorage.getItem("soccer_api_url") || "https://soccer-intelligence-engine.onrender.com";
+
+function changeApiUrl() {
+  const url = prompt("Enter Render backend URL:", API_BASE);
+  if (url) {
+    API_BASE = url.replace(/\/$/, "");
+    localStorage.setItem("soccer_api_url", API_BASE);
+    checkHealth();
+  }
+}
+
+async function apiFetch(path, opts = {}) {
+  const r = await fetch(`${API_BASE}${path}`, {
+    headers: {"Content-Type": "application/json"},
+    ...opts
+  });
+  if (!r.ok) throw new Error(`API error ${r.status}`);
+  return r.json();
+}
+
+async function checkHealth() {
+  const dot = document.getElementById("statusDot");
+  const txt = document.getElementById("statusText");
+  const badge = document.getElementById("apiBadge");
+  badge.textContent = API_BASE.replace("https://", "");
+  try {
+    await apiFetch("/health");
+    dot.style.background = "var(--green)";
+    txt.textContent = "Engine Connected";
+  } catch (e) {
+    dot.style.background = "var(--red)";
+    txt.textContent = "Backend Offline / Sleeping";
+  }
+}
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// PARSER: SPORTPESA, BETIKA, ODIBETS, CSV, JSON
+// UNIVERSAL PARSER (SportPesa, Betika, Odibets, CSV, Raw)
 // ═══════════════════════════════════════════════════════════════════════════════
-function parseAnyFormat(text) {
+function parseSlip(text) {
   if (!text || !text.trim()) return [];
   const raw = text.trim();
+  const fixtures = [];
 
-  // 1. JSON Array
+  // JSON format
   if (raw.startsWith("[") && raw.endsWith("]")) {
-    try {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) return parsed;
-    } catch (e) {}
+    try { return JSON.parse(raw); } catch(e){}
   }
 
   const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-  const fixtures = [];
 
-  // 2. ODIBETS (Contains "ID:" or "| ID:")
+  // Odibets parser
   if (/ID:\s*\d+/i.test(raw)) {
-    let i = 0;
-    while (i < lines.length) {
+    for (let i = 0; i < lines.length; i++) {
       if (/ID:\s*\d+/i.test(lines[i])) {
-        i++;
-        if (i < lines.length) {
-          const home = lines[i++];
-          if (i < lines.length) {
-            const away = lines[i++];
-            let oh = null, od = null, oa = null;
-            while (i < lines.length && !/ID:\s*\d+/i.test(lines[i])) {
-              const cur = lines[i];
-              if (/^Home$/i.test(cur) && i + 1 < lines.length && /^\d+(\.\d+)?$/.test(lines[i+1])) {
-                oh = parseFloat(lines[++i]);
-              } else if (/^Draw$/i.test(cur) && i + 1 < lines.length && /^\d+(\.\d+)?$/.test(lines[i+1])) {
-                od = parseFloat(lines[++i]);
-              } else if (/^Away$/i.test(cur) && i + 1 < lines.length && /^\d+(\.\d+)?$/.test(lines[i+1])) {
-                oa = parseFloat(lines[++i]);
-              } else {
-                i++;
-              }
-            }
-            if (home && away) {
-              fixtures.push({
-                home: home.trim(),
-                away: away.trim(),
-                league: "Premier League",
-                odds_home: oh,
-                odds_draw: od,
-                odds_away: oa
-              });
-            }
-            continue;
-          }
-        }
-      }
-      i++;
-    }
-    if (fixtures.length > 0) return fixtures;
-  }
-
-  // 3. BETIKA (Contains "•" and "+XX Markets")
-  if (/•/i.test(raw) && /\+\d+\s+Markets/i.test(raw)) {
-    let curLeague = "Premier League";
-    let i = 0;
-    while (i < lines.length) {
-      const line = lines[i];
-      if (line.includes("•") && !line.includes("STARTS IN")) {
-        curLeague = line.replace(/International Clubs\s*•\s*/i, '').trim();
-        i++;
-        if (i < lines.length && /^\d{2}\/\d{2}/.test(lines[i])) i++;
-        if (i < lines.length) {
-          const home = lines[i++];
-          if (i < lines.length) {
-            const away = lines[i++];
-            let oh = null, od = null, oa = null;
-            const oddsList = [];
-            while (i < lines.length && !lines[i].includes("•") && !/^\+\d+\s+Markets/i.test(lines[i])) {
-              const val = parseFloat(lines[i]);
-              if (!isNaN(val) && val > 1.0 && val < 100.0) {
-                oddsList.push(val);
-              }
-              i++;
-            }
-            if (oddsList.length >= 3) {
-              oh = oddsList[0];
-              od = oddsList[1];
-              oa = oddsList[2];
-            }
-            if (home && away) {
-              fixtures.push({
-                home: home.trim(),
-                away: away.trim(),
-                league: curLeague,
-                odds_home: oh,
-                odds_draw: od,
-                odds_away: oa
-              });
-            }
-            continue;
-          }
-        }
-      }
-      i++;
-    }
-    if (fixtures.length > 0) return fixtures;
-  }
-
-  // 4. SPORTPESA (Contains "#XXXX" and 1 / X / 2 format)
-  if (/#\d+/.test(raw)) {
-    let curLeague = "Premier League";
-    let i = 0;
-    while (i < lines.length) {
-      const line = lines[i];
-      if (/\//.test(line) && /\(\d+\)$/.test(line)) {
-        curLeague = line.replace(/\(\d+\)$/, '').replace(/International Clubs\s*\/\s*/i, '').trim();
-        i++;
-        continue;
-      }
-      if (/^#\d+$/.test(line)) {
-        let idx = i - 1;
-        if (idx >= 0 && (lines[idx].includes("STARTS IN") || /^\d{2}\/\d{2}/.test(lines[idx]))) {
-          idx--;
-        }
-        const away = (idx >= 0) ? lines[idx--] : "";
-        const home = (idx >= 0) ? lines[idx--] : "";
-        
+        const home = lines[++i];
+        const away = lines[++i];
         let oh = null, od = null, oa = null;
-        let fwd = i + 1;
-        while (fwd < lines.length && !/^#\d+$/.test(lines[fwd]) && !/\(\d+\)$/.test(lines[fwd])) {
-          if (lines[fwd] === "1" && fwd + 1 < lines.length && /^\d+(\.\d+)?$/.test(lines[fwd+1])) {
-            oh = parseFloat(lines[fwd+1]);
-            fwd += 2;
-          } else if ((lines[fwd] === "X" || lines[fwd] === "x") && fwd + 1 < lines.length && /^\d+(\.\d+)?$/.test(lines[fwd+1])) {
-            od = parseFloat(lines[fwd+1]);
-            fwd += 2;
-          } else if (lines[fwd] === "2" && fwd + 1 < lines.length && /^\d+(\.\d+)?$/.test(lines[fwd+1])) {
-            oa = parseFloat(lines[fwd+1]);
-            fwd += 2;
-          } else {
-            fwd++;
-          }
+        while (i < lines.length && !/ID:\s*\d+/i.test(lines[i])) {
+          if (/^Home$/i.test(lines[i]) && lines[i+1]) oh = parseFloat(lines[++i]);
+          if (/^Draw$/i.test(lines[i]) && lines[i+1]) od = parseFloat(lines[++i]);
+          if (/^Away$/i.test(lines[i]) && lines[i+1]) oa = parseFloat(lines[++i]);
+          i++;
         }
-        if (home && away && home !== "🔥  HOT" && away !== "🔥  HOT") {
-          fixtures.push({
-            home: home.trim(),
-            away: away.trim(),
-            league: curLeague,
-            odds_home: oh,
-            odds_draw: od,
-            odds_away: oa
-          });
-        }
-        i = fwd;
-        continue;
+        if (home && away) fixtures.push({ home, away, odds_home: oh, odds_draw: od, odds_away: oa });
       }
-      i++;
     }
-    if (fixtures.length > 0) return fixtures;
+    if (fixtures.length) return fixtures;
   }
 
-  // 5. Line-by-line fallback
-  for (let l of lines) {
-    if (/vs/i.test(l) || /-/.test(l)) {
-      const parts = l.split(/,|\t/).map(p => p.trim());
-      const matchPart = parts[0];
-      let h = "", a = "";
-      if (/vs/i.test(matchPart)) {
-        [h, a] = matchPart.split(/vs/i);
-      } else if (matchPart.includes("-")) {
-        [h, a] = matchPart.split("-");
+  // Betika parser
+  if (raw.includes("•") && /Markets/i.test(raw)) {
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].includes("•") && !lines[i].includes("STARTS")) {
+        const league = lines[i];
+        let next = lines[++i];
+        if (/^\d{2}\/\d{2}/.test(next)) next = lines[++i];
+        const home = next;
+        const away = lines[++i];
+        const odds = [];
+        while (i < lines.length && !lines[i].includes("•") && !lines[i].includes("Markets")) {
+          const v = parseFloat(lines[i]);
+          if (!isNaN(v) && v > 1.01 && v < 100) odds.push(v);
+          i++;
+        }
+        if (home && away) fixtures.push({ home, away, league, odds_home: odds[0], odds_draw: odds[1], odds_away: odds[2] });
       }
+    }
+    if (fixtures.length) return fixtures;
+  }
+
+  // SportPesa / Fallback parser
+  for (let l of lines) {
+    if (/vs/i.test(l) || / - /i.test(l)) {
+      const parts = l.split(/,|\t|\s{2,}/).map(s => s.trim());
+      const m = parts[0];
+      let [h, a] = /vs/i.test(m) ? m.split(/vs/i) : m.split("-");
       if (h && a) {
         fixtures.push({
           home: h.trim(),
           away: a.trim(),
-          league: parts[4] || "Premier League",
           odds_home: parseFloat(parts[1]) || null,
           odds_draw: parseFloat(parts[2]) || null,
           odds_away: parseFloat(parts[3]) || null
@@ -635,53 +301,173 @@ function parseAnyFormat(text) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// UTILITIES
+// RENDERING
 // ═══════════════════════════════════════════════════════════════════════════════
+function renderCard(p, index) {
+  const ph = (p.p_home * 100).toFixed(1);
+  const pd = (p.p_draw * 100).toFixed(1);
+  const pa = (p.p_away * 100).toFixed(1);
+  const tierCls = (p.confidence_tier || "NO BET").toLowerCase().replace(" ", "-");
 
-function toast(msg, type = "success") {
-  const el = document.createElement("div");
-  el.className = `toast-item ${type}`;
-  el.innerHTML = `<span>${type === "success" ? "✓" : "✗"}</span> ${msg}`;
-  document.getElementById("toast").appendChild(el);
-  setTimeout(() => el.remove(), 4000);
+  return `
+  <div class="pred-card ${tierCls}">
+    <div class="pred-header">
+      <div>
+        <div class="pred-teams">${index != null ? `#${index} ` : ""}${p.home} <span style="color:var(--text3)">vs</span> ${p.away}</div>
+        <div class="pred-meta">${p.league || "Universal League"} · Rating Gap: ${p.elo_gap > 0 ? "+" : ""}${p.elo_gap}</div>
+      </div>
+      <div class="pred-pick">
+        <div class="pred-pick-val" style="color:${p.confidence_tier==='ELITE'?'var(--green)':p.confidence_tier==='STRONG'?'var(--blue)':'var(--amber)'}">
+          ${p.pick} @ ${parseFloat(p.pick_odds).toFixed(2)}
+        </div>
+        <div style="margin-top:4px"><span class="tier tier-${p.confidence_tier}">${p.confidence_tier}</span></div>
+      </div>
+    </div>
+    <div class="prob-bar">
+      <div class="pb-h" style="width:${ph}%"></div>
+      <div class="pb-d" style="width:${pd}%"></div>
+      <div class="pb-a" style="width:${pa}%"></div>
+    </div>
+    <div class="prob-labels">
+      <span>1: ${ph}%</span>
+      <span>X: ${pd}%</span>
+      <span>2: ${pa}%</span>
+    </div>
+    <div class="pred-body">
+      <div class="pred-stat"><div class="pred-stat-label">Model Prob</div><div class="pred-stat-val">${(p.pick_prob*100).toFixed(1)}%</div></div>
+      <div class="pred-stat"><div class="pred-stat-label">Double Chance 1X</div><div class="pred-stat-val">${(p.p_1x*100).toFixed(1)}%</div></div>
+      <div class="pred-stat"><div class="pred-stat-label">Double Chance X2</div><div class="pred-stat-val">${(p.p_x2*100).toFixed(1)}%</div></div>
+      <div class="pred-stat"><div class="pred-stat-label">Over 1.5</div><div class="pred-stat-val">${(p.p_over15*100).toFixed(1)}%</div></div>
+    </div>
+    <div class="pred-reason">
+      <strong>Model Insight:</strong> ${p.reason}
+    </div>
+  </div>`;
 }
 
-function setLoading(container, msg = "Computing predictions…") {
-  document.getElementById(container).innerHTML =
-    `<div class="loading"><div class="spinner"></div>${msg}</div>`;
+function renderAcca(a) {
+  const isBanker = a.name.includes("Banker");
+  return `
+  <div class="acca-card ${isBanker ? 'banker' : ''}">
+    <div class="acca-header">
+      <div>
+        <div style="font-size:11px;color:${isBanker?'var(--green)':'var(--gold)'};font-weight:700">★ RECOMMENDED ACCUMULATOR</div>
+        <div class="acca-title">${a.name}</div>
+        <div style="font-size:11px;color:var(--text2)">Combined Win Probability: <strong>${a.combined_model_prob}%</strong></div>
+      </div>
+      <div style="text-align:right">
+        <div class="acca-odds">${a.combined_odds}x</div>
+        <div style="font-size:11px;color:var(--text2)">total odds</div>
+      </div>
+    </div>
+    ${a.legs.map((l, i) => `
+      <div class="acca-leg">
+        <div class="leg-num">${i+1}</div>
+        <div style="flex:1"><strong>${l.home} vs ${l.away}</strong><br/><span style="color:var(--text2);font-size:11px">${l.pick}</span></div>
+        <span class="tier tier-${l.tier}">${(l.prob*100).toFixed(0)}%</span>
+        <strong style="color:var(--gold);font-family:var(--mono)">@ ${l.odds.toFixed(2)}</strong>
+      </div>
+    `).join('')}
+  </div>`;
 }
 
-function pct(v) { return v != null ? (v * 100).toFixed(1) + "%" : "—"; }
-function num(v, d=2) { return v != null ? parseFloat(v).toFixed(d) : "—"; }
+// ═══════════════════════════════════════════════════════════════════════════════
+// ACTIONS
+// ═══════════════════════════════════════════════════════════════════════════════
+async function runBatch() {
+  const raw = document.getElementById("batch-input").value;
+  const fixtures = parseSlip(raw);
+  if (!fixtures.length) return alert("Please paste matches first.");
 
-function domainClass(d) {
-  if (!d) return "";
-  if (d === "domestic_top5") return "domain-domestic";
-  if (d === "international_tournament") return "domain-intl";
-  if (d === "club_continental") return "domain-continental";
-  return "domain-friendly";
-}
+  document.getElementById("batch-output").innerHTML = `<div class="loading"><div class="spinner"></div>De-vigging market odds & computing Bayesian predictions…</div>`;
 
-function tierCard(tier) {
-  return `<span class="tier tier-${tier || "REJECT"}">${tier || "NO BET"}</span>`;
-}
+  try {
+    const data = await apiFetch("/predict/batch", {
+      method: "POST",
+      body: JSON.stringify({ fixtures })
+    });
 
-async function apiFetch(path, options = {}) {
-  const url = API_BASE.replace(/\/$/, "") + path;
-  const r = await fetch(url, {
-    headers: { "Content-Type": "application/json", "Accept": "application/json" },
-    ...options,
-  });
-  if (!r.ok) {
-    const txt = await r.text().catch(() => "");
-    throw new Error(`API ${r.status}: ${txt.slice(0, 120)}`);
+    let html = `
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-box-val">${data.total_fixtures}</div><div class="stat-box-label">Matches</div></div>
+      <div class="stat-box"><div class="stat-box-val" style="color:var(--green)">${data.actionable_picks}</div><div class="stat-box-label">Safe Picks</div></div>
+      <div class="stat-box"><div class="stat-box-val" style="color:var(--gold)">${data.accumulators.length}</div><div class="stat-box-label">Accas Built</div></div>
+      <div class="stat-box"><div class="stat-box-val" style="color:var(--text3)">${data.no_bet_count}</div><div class="stat-box-label">No Bet</div></div>
+    </div>`;
+
+    if (data.accumulators.length) {
+      html += `<div class="section-title">Mathematically Sound Accumulators</div>`;
+      data.accumulators.forEach(a => html += renderAcca(a));
+    }
+
+    html += `<div class="section-title" style="margin-top:24px">Individual Match Predictions</div>`;
+    data.predictions.forEach((p, idx) => html += renderCard(p, idx + 1));
+
+    document.getElementById("batch-output").innerHTML = html;
+  } catch (e) {
+    document.getElementById("batch-output").innerHTML = `<div class="card" style="border-color:var(--red)">Failed: ${e.message}</div>`;
   }
-  return r.json();
 }
 
-document.querySelectorAll(".toggle").forEach(t => {
-  t.addEventListener("click", () => t.classList.toggle("on"));
-});
+async function runSingle() {
+  const home = document.getElementById("sp-home").value.trim();
+  const away = document.getElementById("sp-away").value.trim();
+  if (!home || !away) return alert("Enter team names");
+
+  const body = {
+    home, away,
+    odds_home: parseFloat(document.getElementById("sp-oh").value) || null,
+    odds_draw: parseFloat(document.getElementById("sp-od").value) || null,
+    odds_away: parseFloat(document.getElementById("sp-oa").value) || null
+  };
+
+  document.getElementById("single-output").innerHTML = `<div class="loading"><div class="spinner"></div>Computing…</div>`;
+  try {
+    const p = await apiFetch("/predict", { method: "POST", body: JSON.stringify(body) });
+    document.getElementById("single-output").innerHTML = renderCard(p);
+  } catch (e) {
+    document.getElementById("single-output").innerHTML = `<div class="card" style="border-color:var(--red)">${e.message}</div>`;
+  }
+}
+
+async function fetchToday() {
+  const lg = document.getElementById("live-league").value;
+  document.getElementById("today-output").innerHTML = `<div class="loading"><div class="spinner"></div>Fetching fixtures…</div>`;
+  try {
+    const data = await apiFetch(`/fixtures/today?league=${lg}`);
+    let html = `<div class="card"><table style="width:100%;font-size:12px;border-collapse:collapse">`;
+    (data.fixtures || []).forEach(f => {
+      html += `<tr style="border-bottom:1px solid var(--border);padding:8px 0">
+        <td style="padding:8px 0"><strong>${f.home}</strong> vs ${f.away}</td>
+        <td style="text-align:right"><button class="btn btn-secondary btn-sm" onclick="quickPredict('${f.home}','${f.away}')">Predict</button></td>
+      </tr>`;
+    });
+    html += `</table></div>`;
+    document.getElementById("today-output").innerHTML = html;
+  } catch (e) {
+    document.getElementById("today-output").innerHTML = `<div class="card">${e.message}</div>`;
+  }
+}
+
+function quickPredict(h, a) {
+  document.getElementById("sp-home").value = h;
+  document.getElementById("sp-away").value = a;
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelector('[data-tab="predict"]').classList.add("active");
+  document.getElementById("page-predict").classList.add("active");
+  runSingle();
+}
+
+function loadSample() {
+  document.getElementById("batch-input").value = 
+`Juventus vs Nec Nijmegen 1.18 6.50 15.00
+Celtic vs Ferencvaros 1.72 3.80 4.50
+Fk Zeleznicar Pancevo vs Crvena Zvezda 6.20 4.20 1.45
+Wimbledon vs Mk Dons 2.70 3.10 2.65
+Bastia vs Cannes 2.75 3.00 2.60
+Real Sociedad vs Bournemouth 3.30 3.40 2.15`;
+}
 
 document.querySelectorAll(".tab").forEach(tab => {
   tab.addEventListener("click", () => {
@@ -692,379 +478,7 @@ document.querySelectorAll(".tab").forEach(tab => {
   });
 });
 
-async function checkHealth() {
-  const dot  = document.getElementById("statusDot");
-  const txt  = document.getElementById("statusText");
-  const badge= document.getElementById("apiUrlBadge");
-  badge.textContent = API_BASE.replace("https://","");
-  try {
-    const h = await apiFetch("/health");
-    dot.style.background = "var(--green)";
-    txt.textContent = "Engine Online";
-    return h;
-  } catch {
-    dot.style.background = "var(--red)";
-    txt.textContent = "Backend Offline";
-  }
-  return null;
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// RENDERERS
-// ═══════════════════════════════════════════════════════════════════════════════
-
-function renderPredCard(p, matchOrder = null) {
-  const tier   = p.confidence_tier || "REJECT";
-  const nobet  = p.pick === "NO BET" || !p.pick;
-  const cls    = nobet ? "no-bet" : tier.toLowerCase();
-  const pickColor = tier === "ELITE" ? "var(--green)" : tier === "STRONG" ? "var(--blue)"
-                  : tier === "CANDIDATE" ? "var(--amber)" : "var(--text3)";
-  const ph = (p.p_home || 0) * 100;
-  const pd = (p.p_draw || 0) * 100;
-  const pa = (p.p_away || 0) * 100;
-  const domain_lbl = (p.domain || "unknown").replace("_"," ");
-
-  const edgeSection = p.edge_home != null ? `
-    <div class="pred-stat"><div class="pred-stat-label">Edge H/D/A</div>
-      <div class="pred-stat-val" style="font-size:11px;font-family:var(--mono)">
-        ${num(p.edge_home*100,1)}% / ${num(p.edge_draw*100,1)}% / ${num(p.edge_away*100,1)}%
-      </div></div>` : "";
-
-  return `
-<div class="pred-card ${cls}">
-  <div class="pred-header">
-    <div>
-      <div class="pred-teams">
-        ${matchOrder != null ? `<span style="color:var(--gold);margin-right:6px">#${matchOrder}</span>` : ""}
-        ${p.home} <span style="color:var(--text3)">vs</span> ${p.away}
-      </div>
-      <div class="pred-meta">
-        ${p.league}
-        <span class="domain-pill ${domainClass(p.domain)}" style="margin-left:6px">${domain_lbl}</span>
-      </div>
-    </div>
-    <div class="pred-pick">
-      <div class="pred-pick-label">Pick</div>
-      <div class="pred-pick-val" style="color:${pickColor}">
-        ${nobet ? "NO BET" : `${p.pick} @ ${num(p.pick_odds,2)}`}
-      </div>
-      <div style="margin-top:4px">${tierCard(tier)}</div>
-    </div>
-  </div>
-
-  <div class="prob-bar">
-    <div class="pb-h" style="width:${ph.toFixed(1)}%"></div>
-    <div class="pb-d" style="width:${pd.toFixed(1)}%"></div>
-    <div class="pb-a" style="width:${pa.toFixed(1)}%"></div>
-  </div>
-  <div class="prob-labels">
-    <span>${p.home} ${pct(p.p_home)}</span>
-    <span>Draw ${pct(p.p_draw)}</span>
-    <span>${p.away} ${pct(p.p_away)}</span>
-  </div>
-
-  <div class="pred-body">
-    <div class="pred-stat"><div class="pred-stat-label">BTTS</div><div class="pred-stat-val">${pct(p.p_btts_yes)}</div></div>
-    <div class="pred-stat"><div class="pred-stat-label">Over 2.5</div><div class="pred-stat-val">${pct(p.p_over25)}</div></div>
-    <div class="pred-stat"><div class="pred-stat-label">λ Home / Away</div>
-      <div class="pred-stat-val" style="font-family:var(--mono);font-size:12px">${num(p.lambda_home,2)} / ${num(p.lambda_away,2)}</div></div>
-    <div class="pred-stat"><div class="pred-stat-label">ρ (rho)</div>
-      <div class="pred-stat-val" style="font-family:var(--mono)">${num(p.rho_used,4)}</div></div>
-    ${edgeSection}
-    <div class="pred-stat"><div class="pred-stat-label">Adj. Edge</div>
-      <div class="pred-stat-val" style="color:${(p.adj_edge||0)>=0.08?'var(--green)':'var(--text2)'}">${p.adj_edge != null ? num(p.adj_edge*100,1)+"%" : "—"}</div></div>
-    <div class="pred-stat"><div class="pred-stat-label">Acca Eligible</div>
-      <div class="pred-stat-val" style="color:${p.acca_eligible?'var(--green)':'var(--text3)'}">${p.acca_eligible ? "✓ Yes" : "✗ No"}</div></div>
-  </div>
-
-  <div class="pred-reason">
-    <strong style="color:var(--text2)">Model:</strong> ${p.model_used || "—"}<br/>
-    ${p.reason || ""}
-  </div>
-</div>`;
-}
-
-function renderAccaCard(a, rank) {
-  const isBest = rank === 1;
-  const legs = (a.legs || []).map((l, i) => `
-    <div class="acca-leg">
-      <div class="leg-num">${i+1}</div>
-      <div class="leg-teams"><strong>${l.home} vs ${l.away}</strong><br/>
-        <span style="color:var(--text2);font-size:11px">${l.league}</span>
-      </div>
-      ${tierCard(l.tier)}
-      <span style="font-size:12px;font-weight:600">${l.pick}</span>
-      <span class="leg-odds">@ ${num(l.odds,2)}</span>
-    </div>`).join("");
-
-  return `
-<div class="acca-card ${isBest?"best":""}">
-  <div class="acca-header">
-    <div>
-      ${isBest ? '<div style="font-size:10px;color:var(--green);font-weight:600;margin-bottom:4px">★ BEST ACCA OF THE DAY</div>' : ""}
-      <div class="acca-title">${a.n_legs}-leg Accumulator</div>
-      <div class="acca-meta">Model prob: ${num(a.combined_model_prob,1)}% · Avg adj. edge: ${num(a.avg_adj_edge,1)}%</div>
-    </div>
-    <div style="text-align:right">
-      <div class="acca-odds">${num(a.combined_odds,2)}x</div>
-      <div style="font-size:11px;color:var(--text2)">combined odds</div>
-    </div>
-  </div>
-  ${legs}
-</div>`;
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// SINGLE PREDICT
-// ═══════════════════════════════════════════════════════════════════════════════
-
-async function runSinglePredict() {
-  const home = document.getElementById("p-home").value.trim();
-  const away = document.getElementById("p-away").value.trim();
-  if (!home || !away) { toast("Enter home and away team names", "error"); return; }
-
-  setLoading("single-result", "Computing prediction…");
-  const body = {
-    home, away,
-    league:           document.getElementById("p-league").value.trim() || "Premier League",
-    match_date:       document.getElementById("p-date").value || null,
-    odds_home:        parseFloat(document.getElementById("p-oh").value) || null,
-    odds_draw:        parseFloat(document.getElementById("p-od").value) || null,
-    odds_away:        parseFloat(document.getElementById("p-oa").value) || null,
-    is_neutral:       document.getElementById("p-neutral").classList.contains("on"),
-    tournament_phase: document.getElementById("p-phase").value,
-  };
-
-  try {
-    const p = await apiFetch("/predict", { method: "POST", body: JSON.stringify(body) });
-    document.getElementById("single-result").innerHTML = renderPredCard(p);
-    toast(`Prediction: ${p.pick} [${p.confidence_tier}]`);
-  } catch (e) {
-    document.getElementById("single-result").innerHTML =
-      `<div class="card" style="border-color:var(--red)">${e.message}</div>`;
-    toast(e.message, "error");
-  }
-}
-
-function fillExample(type) {
-  if (type === "domestic") {
-    document.getElementById("p-home").value = "Arsenal";
-    document.getElementById("p-away").value = "Manchester City";
-    document.getElementById("p-league").value = "Premier League";
-    document.getElementById("p-oh").value = "3.20";
-    document.getElementById("p-od").value = "3.50";
-    document.getElementById("p-oa").value = "2.20";
-    document.getElementById("p-neutral").classList.remove("on");
-    document.getElementById("p-phase").value = "league";
-  } else {
-    document.getElementById("p-home").value = "France";
-    document.getElementById("p-away").value = "Brazil";
-    document.getElementById("p-league").value = "FIFA WCQ";
-    document.getElementById("p-oh").value = "2.80";
-    document.getElementById("p-od").value = "3.10";
-    document.getElementById("p-oa").value = "2.60";
-    document.getElementById("p-neutral").classList.add("on");
-    document.getElementById("p-phase").value = "group";
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// BATCH PREDICT WITH AUTO-CHUNKING (FIXES 400 ERROR COMPLETELY)
-// ═══════════════════════════════════════════════════════════════════════════════
-
-async function runBatch() {
-  const raw = document.getElementById("batch-json").value.trim();
-  if (!raw) { toast("Paste matches or JSON first", "error"); return; }
-
-  const fixtures = parseAnyFormat(raw);
-  if (!fixtures.length) {
-    toast("No fixtures detected. Check input format.", "error");
-    return;
-  }
-
-  setLoading("batch-result", `Running ${fixtures.length} predictions in chronological order…`);
-  try {
-    const CHUNK_SIZE = 25; // Chunks ensure zero 400 limits or timeouts
-    let allPredictions = [];
-    let allAccas = [];
-    let actionableCount = 0;
-    let noBetCount = 0;
-    let accaEligibleCount = 0;
-
-    for (let i = 0; i < fixtures.length; i += CHUNK_SIZE) {
-      const chunk = fixtures.slice(i, i + CHUNK_SIZE);
-      const data = await apiFetch("/predict/batch", {
-        method: "POST",
-        body: JSON.stringify({ fixtures: chunk }),
-      });
-
-      if (data.predictions) allPredictions.push(...data.predictions);
-      if (data.accumulators) allAccas.push(...data.accumulators);
-      actionableCount += (data.actionable_picks || 0);
-      noBetCount += (data.no_bet_count || 0);
-      accaEligibleCount += (data.acca_eligible_count || 0);
-    }
-
-    // Retain exact chronological order
-    const orderedPredictions = [];
-    const predPool = [...allPredictions];
-    for (let f of fixtures) {
-      const idx = predPool.findIndex(p =>
-        (p.home || "").toLowerCase().trim() === (f.home || "").toLowerCase().trim() &&
-        (p.away || "").toLowerCase().trim() === (f.away || "").toLowerCase().trim()
-      );
-      if (idx !== -1) {
-        orderedPredictions.push(predPool.splice(idx, 1)[0]);
-      }
-    }
-    orderedPredictions.push(...predPool);
-
-    let html = `
-<div class="stats-grid" style="margin-top:16px">
-  <div class="stat-box"><div class="stat-box-val" style="color:var(--gold)">${fixtures.length}</div><div class="stat-box-label">Fixtures Analysed</div></div>
-  <div class="stat-box"><div class="stat-box-val" style="color:var(--green)">${actionableCount}</div><div class="stat-box-label">Actionable Picks</div></div>
-  <div class="stat-box"><div class="stat-box-val" style="color:var(--text3)">${noBetCount}</div><div class="stat-box-label">No Bet</div></div>
-  <div class="stat-box"><div class="stat-box-val" style="color:var(--blue)">${accaEligibleCount}</div><div class="stat-box-label">Acca Eligible</div></div>
-</div>`;
-
-    if (allAccas.length) {
-      html += `<div class="section-title" style="margin:16px 0 12px">Recommended Accumulators</div>`;
-      allAccas.slice(0, 5).forEach((a, i) => { html += renderAccaCard(a, i+1); });
-    }
-
-    html += `<div class="section-title" style="margin:20px 0 12px">All Match Predictions (Chronological Order as Provided)</div>`;
-    orderedPredictions.forEach((p, idx) => {
-      html += renderPredCard(p, idx + 1);
-    });
-
-    document.getElementById("batch-result").innerHTML = html;
-    toast(`Predicted ${fixtures.length} fixtures in chronological order`);
-  } catch (e) {
-    document.getElementById("batch-result").innerHTML =
-      `<div class="card" style="border-color:var(--red)">${e.message}</div>`;
-    toast(e.message, "error");
-  }
-}
-
-function loadBatchExample() {
-  document.getElementById("batch-json").value = JSON.stringify([
-    {"home":"Arsenal","away":"Chelsea","league":"Premier League","odds_home":2.10,"odds_draw":3.40,"odds_away":3.60},
-    {"home":"Barcelona","away":"Real Madrid","league":"La Liga","odds_home":2.40,"odds_draw":3.20,"odds_away":3.10},
-    {"home":"Bayern Munich","away":"Borussia Dortmund","league":"Bundesliga","odds_home":1.90,"odds_draw":3.80,"odds_away":4.20},
-    {"home":"France","away":"Brazil","league":"FIFA WCQ","odds_home":2.80,"odds_draw":3.10,"odds_away":2.60,"is_neutral":true,"tournament_phase":"group"}
-  ], null, 2);
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// TODAY'S FIXTURES (Uses football-data.org)
-// ═══════════════════════════════════════════════════════════════════════════════
-
-async function fetchToday() {
-  const league = document.getElementById("today-league").value;
-  setLoading("today-result", "Fetching fixtures from football-data.org…");
-  try {
-    const data = await apiFetch(`/fixtures/today?league=${league}`);
-    const fixtures = data.fixtures || [];
-    if (!fixtures.length) {
-      document.getElementById("today-result").innerHTML =
-        `<div class="card" style="text-align:center;color:var(--text2)">No fixtures scheduled today for ${league}. Check back on matchday!</div>`;
-      return;
-    }
-
-    let html = `<div class="card"><table class="tbl"><tr>
-      <th>Home</th><th>Away</th><th>Kickoff (UTC)</th><th>Status</th><th>Action</th>
-    </tr>`;
-    fixtures.forEach(f => {
-      const kick = f.kickoff ? new Date(f.kickoff).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}) : "—";
-      html += `<tr>
-        <td><strong>${f.home}</strong></td>
-        <td>${f.away}</td>
-        <td style="font-family:var(--mono)">${kick}</td>
-        <td><span style="font-size:11px;color:var(--text3)">${f.status||""}</span></td>
-        <td><button class="btn btn-secondary btn-sm"
-          onclick="quickPredict('${f.home.replace(/'/g,"\\'")}','${f.away.replace(/'/g,"\\'")}','${(data.league||league)}')">
-          Predict</button></td>
-      </tr>`;
-    });
-    html += `</table></div>`;
-    document.getElementById("today-result").innerHTML = html;
-    toast(`${fixtures.length} fixtures loaded for ${league}`);
-  } catch (e) {
-    document.getElementById("today-result").innerHTML =
-      `<div class="card" style="border-color:var(--amber)">
-        <strong>Live fixtures status:</strong><br/>
-        <code style="font-size:11px;color:var(--text3)">${e.message}</code>
-      </div>`;
-  }
-}
-
-function quickPredict(home, away, league) {
-  document.getElementById("p-home").value = home;
-  document.getElementById("p-away").value = away;
-  document.getElementById("p-league").value = league;
-  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-  document.querySelector('[data-tab="predict"]').classList.add("active");
-  document.getElementById("page-predict").classList.add("active");
-  runSinglePredict();
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// ELO LOOKUP
-// ═══════════════════════════════════════════════════════════════════════════════
-
-async function fetchElo() {
-  const team = document.getElementById("elo-team").value.trim();
-  const intl  = document.getElementById("elo-type").value;
-  if (!team) { toast("Enter a team name", "error"); return; }
-
-  setLoading("elo-result", `Looking up Elo for ${team}…`);
-  try {
-    const data = await apiFetch(`/elo/${encodeURIComponent(team)}?international=${intl}`);
-    const eloNorm = Math.min(Math.max((data.elo - 1200) / 1000, 0), 1);
-    document.getElementById("elo-result").innerHTML = `
-<div class="card" style="max-width:400px">
-  <div style="font-size:18px;font-weight:700;margin-bottom:8px">${data.team}</div>
-  <div style="font-size:36px;font-weight:700;color:var(--gold);font-family:var(--mono);margin-bottom:8px">${data.elo.toFixed(0)}</div>
-  <div class="elo-bar"><div class="elo-fill" style="width:${(eloNorm*100).toFixed(0)}%"></div></div>
-  <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:4px">
-    <span>1200 (weakest)</span><span>2200 (strongest)</span>
-  </div>
-  <div style="margin-top:10px;font-size:12px;color:var(--text2)">
-    Source: <strong>${data.source}</strong> · Updated: ${data.date}
-  </div>
-</div>`;
-    toast(`${team}: ${data.elo.toFixed(0)} Elo`);
-  } catch (e) {
-    document.getElementById("elo-result").innerHTML =
-      `<div class="card" style="border-color:var(--red)">${e.message}</div>`;
-    toast(e.message, "error");
-  }
-}
-
-function promptApiUrl() {
-  const saved = localStorage.getItem("soccer_api_url");
-  const url = prompt(
-    "Enter your Render backend URL (e.g. https://soccer-intelligence-engine.onrender.com):",
-    saved || "https://soccer-intelligence-engine.onrender.com"
-  );
-  if (url) {
-    localStorage.setItem("soccer_api_url", url.replace(/\/$/, ""));
-    location.reload();
-  }
-}
-
-document.getElementById("apiUrlBadge").addEventListener("click", promptApiUrl);
-document.getElementById("apiUrlBadge").style.cursor = "pointer";
-document.getElementById("apiUrlBadge").title = "Click to change backend URL";
-
-document.getElementById("p-away").addEventListener("keydown", e => {
-  if (e.key === "Enter") runSinglePredict();
-});
-
-document.addEventListener("DOMContentLoaded", async () => {
-  await checkHealth();
-});
+document.addEventListener("DOMContentLoaded", checkHealth);
 </script>
 </body>
 </html>
