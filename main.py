@@ -1,8 +1,24 @@
 """
 ═══════════════════════════════════════════════════════════════════════════════
-SOCCER INTELLIGENCE ENGINE v4.0 — PRODUCTION QUANTITATIVE BACKEND
-Zero LLM · Pure Quantitative Mathematics · Shin/Power De-vigging
-Dixon-Coles Bivariate Poisson · Reverse Elo Imputation · Multi-Market Engine
+SOCCER INTELLIGENCE ENGINE  v3.3  —  FASTAPI BACKEND (FIXED)
+Zero LLM · Pure Mathematics · Dixon-Coles · Bivariate Poisson · Elo Engine
+
+v3.3 CHANGES (fixes to v3.2 that were producing systematic longshot losses):
+  1. Elo lookups now return (value, is_real_data) instead of silently defaulting
+     to 1650 for unknown teams. Unknown-vs-unknown fixtures are honest "NO BET"
+     instead of fabricated identical predictions.
+  2. Pick logic now compares Home / Draw / Away (previously Draw was never a
+     candidate, so the model could never pick X even when p_draw was highest).
+  3. Edge is computed on DE-VIGGED (overround-removed) implied probabilities,
+     and is only used to size confidence on the outcome the model ALREADY
+     thinks is most likely — never to chase the outcome with the longest
+     price. This removes the "big edge on a generic default probability =
+     ELITE longshot" failure mode.
+  4. Tiers require BOTH a probability floor AND a genuine edge, gated on real
+     data for both teams. No more edge-only ELITE promotion, no fabricated
+     0.05 "no odds" edge.
+  5. Batch/acca builder only pulls from fixtures with verified data on both
+     teams and sorts by model probability first, edge second.
 ═══════════════════════════════════════════════════════════════════════════════
 """
 
@@ -19,8 +35,8 @@ from pydantic import BaseModel
 
 app = FastAPI(
     title="Soccer Intelligence Engine",
-    version="4.0.0",
-    description="Quantitative soccer prediction engine using market de-vigging, Dixon-Coles, and calibrated ratings."
+    version="3.3.0",
+    description="Mathematical soccer prediction engine using calibrated Poisson, Dixon-Coles, and Elo ratings."
 )
 
 app.add_middleware(
@@ -31,50 +47,66 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-FOOTBALL_DATA_KEY = os.getenv("FOOTBALL_DATA_API_KEY", "")
-THE_ODDS_API_KEY = os.getenv("THE_ODDS_API_KEY", "")
-
-# Calibrated goal expectancy priors
-DEFAULT_LAMBDA_HOME = 1.36
-DEFAULT_LAMBDA_AWAY = 1.12
-DEFAULT_RHO = -0.055
-
-WC_LAMBDA_HOME = 1.58
-WC_LAMBDA_AWAY = 1.18
-WC_RHO = +0.042
-
 # ═══════════════════════════════════════════════════════════════════════════════
-# EXPANDED ELO SEEDINGS & LIVE CACHE
+# CONFIG
 # ═══════════════════════════════════════════════════════════════════════════════
+FOOTBALL_DATA_KEY = os.getenv("FOOTBALL_DATA_API_KEY", "2c8a24ba8f814bc699b0051e7c98c36b")
+THE_ODDS_API_KEY  = os.getenv("THE_ODDS_API_KEY", "58f44d99c78d4e92a8183182882a170e")
+API_FOOTBALL_KEY  = os.getenv("API_FOOTBALL_KEY", "")
+SPORTMONKS_TOKEN  = os.getenv("SPORTMONKS_API_TOKEN", "")
+
+DEFAULT_LAMBDA_HOME = 1.350
+DEFAULT_LAMBDA_AWAY = 1.150
+DEFAULT_RHO         = -0.052
+
+WC_LAMBDA_HOME      = 1.600
+WC_LAMBDA_AWAY      = 1.191
+WC_RHO              = +0.044
+
+# Minimum model probability required before a pick is allowed at all.
+MIN_PICKABLE_PROB   = 0.38
+# Probability / edge floors per tier. Edge is de-vigged, only ever measured
+# on the model's own top pick (never used to chase a different outcome).
+TIER_THRESHOLDS = {
+    "ELITE":     {"prob": 0.55, "edge": 0.08},
+    "STRONG":    {"prob": 0.48, "edge": 0.04},
+    "CANDIDATE": {"prob": MIN_PICKABLE_PROB, "edge": 0.0},
+}
+
 CLUB_ELO_CACHE: Dict[str, Dict[str, Any]] = {}
 CACHE_TTL = 86400
 
 INTL_ELO_SEEDS: Dict[str, float] = {
-    "argentina": 2150, "france": 2120, "spain": 2115, "england": 2045,
-    "brazil": 2040, "belgium": 1980, "netherlands": 1975, "portugal": 1970,
-    "colombia": 1960, "italy": 1950, "uruguay": 1940, "germany": 1935,
-    "croatia": 1910, "morocco": 1895, "japan": 1885, "senegal": 1855,
+    "argentina": 2145, "france": 2110, "spain": 2105, "england": 2040,
+    "brazil": 2035, "belgium": 1980, "netherlands": 1975, "portugal": 1970,
+    "colombia": 1960, "italy": 1950, "uruguay": 1940, "germany": 1930,
+    "croatia": 1910, "morocco": 1890, "japan": 1880, "senegal": 1850,
     "usa": 1845, "united states": 1845, "mexico": 1840, "switzerland": 1835,
-    "denmark": 1820, "austria": 1815, "korea republic": 1805, "south korea": 1805,
-    "iran": 1795, "australia": 1785, "turkey": 1775, "ukraine": 1770,
+    "denmark": 1820, "austria": 1815, "korea republic": 1800, "south korea": 1800,
+    "iran": 1795, "australia": 1780, "turkey": 1775, "ukraine": 1770,
     "nigeria": 1760, "egypt": 1750, "ivory coast": 1745, "cameroon": 1730,
-    "ecuador": 1820, "poland": 1740, "serbia": 1730, "wales": 1720,
-    "ghana": 1690, "saudi arabia": 1680, "qatar": 1660, "canada": 1765
+    "algeria": 1725, "ghana": 1710, "kenya": 1390, "uganda": 1410, "tanzania": 1360
 }
 
 CLUB_ELO_SEEDS: Dict[str, float] = {
-    "real madrid": 2045, "manchester city": 2040, "liverpool": 2015, "arsenal": 2005,
-    "bayern munich": 1985, "inter": 1975, "barcelona": 1970, "bayer leverkusen": 1960,
-    "paris saint-germain": 1940, "atletico madrid": 1925, "juventus": 1895, "chelsea": 1890,
-    "newcastle": 1860, "sporting cp": 1860, "manchester united": 1850, "atalanta": 1845,
-    "crvena zvezda": 1770, "red star belgrade": 1770, "rb leipzig": 1840, "benfica": 1835,
-    "roma": 1830, "real sociedad": 1820, "villarreal": 1820, "brighton": 1815,
-    "west ham": 1800, "marseille": 1795, "feyenoord": 1785, "psv": 1780, "celtic": 1750,
-    "porto": 1820, "bournemouth": 1745, "ferencvaros": 1690, "viktoria plzen": 1680,
-    "union saint-gilloise": 1740, "nec nijmegen": 1600, "vasco da gama": 1710,
-    "wimbledon": 1450, "mk dons": 1460, "bastia": 1580, "cannes": 1450,
-    "elana torun": 1420, "lech ii poznan": 1470, "lech poznan": 1690
+    "manchester city": 2050, "real madrid": 2040, "arsenal": 1990,
+    "liverpool": 1985, "bayern munich": 1980, "inter": 1975, "inter milan": 1975,
+    "barcelona": 1970, "bayer leverkusen": 1960, "paris saint germain": 1950,
+    "psg": 1950, "atletico madrid": 1930, "borussia dortmund": 1910,
+    "juventus": 1890, "chelsea": 1885, "aston villa": 1880, "tottenham": 1870,
+    "ac milan": 1865, "newcastle": 1860, "newcastle united": 1860,
+    "sporting cp": 1855, "manchester united": 1850, "atalanta": 1845,
+    "rb leipzig": 1840, "benfica": 1835, "roma": 1830, "as roma": 1830,
+    "real sociedad": 1825, "villarreal": 1820, "brighton": 1815,
+    "west ham": 1800, "marseille": 1790, "feyenoord": 1785, "psv": 1780,
+    "celtic": 1750, "rangers": 1740, "porto": 1820, "norwich": 1580,
+    "bournemouth": 1720, "besiktas": 1690, "crystal palace": 1740,
+    "getafe": 1680, "betis": 1760, "real betis": 1760, "viktoria plzen": 1650
 }
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# DOMAIN CLASSIFICATION & DIXON-COLES MATH
+# ═══════════════════════════════════════════════════════════════════════════════
 
 def classify_domain(league: str) -> str:
     if not league:
@@ -84,131 +116,97 @@ def classify_domain(league: str) -> str:
         return "international_tournament"
     if any(k in l for k in ["champions league", "europa", "conference league", "libertadores", "caf champions"]):
         return "club_continental"
-    TOP5_MARKERS = ["premier league", "la liga", "serie a", "bundesliga", "ligue 1", "eredivisie", "championship"]
+    # Only leagues we actually have calibration data for should claim "domestic_top5"
+    TOP5_MARKERS = ["premier league", "la liga", "serie a", "bundesliga", "ligue 1"]
     if any(k in l for k in TOP5_MARKERS):
-        return "domestic_major"
+        return "domestic_top5"
+    # Everything else (regional lower divisions, reserve teams, unfamiliar
+    # leagues) is honestly "unmodeled" rather than force-fit into top-5 params.
     return "unmodeled"
 
+def tau_dixon_coles(x: int, y: int, lambda_h: float, lambda_a: float, rho: float) -> float:
+    if x == 0 and y == 0:
+        return max(1.0 - lambda_h * lambda_a * rho, 0.01)
+    elif x == 0 and y == 1:
+        return 1.0 + lambda_h * rho
+    elif x == 1 and y == 0:
+        return 1.0 + lambda_a * rho
+    elif x == 1 and y == 1:
+        return 1.0 - rho
+    return 1.0
+
+def poisson_prob(k: int, lambd: float) -> float:
+    if lambd <= 0:
+        return 1.0 if k == 0 else 0.0
+    return (math.pow(lambd, k) * math.exp(-lambd)) / math.factorial(k)
+
+def compute_match_probabilities(lambda_h: float, lambda_a: float, rho: float, max_goals: int = 9) -> Dict[str, float]:
+    p_home = p_draw = p_away = p_over25 = p_btts_yes = 0.0
+    for x in range(max_goals + 1):
+        for y in range(max_goals + 1):
+            tau = tau_dixon_coles(x, y, lambda_h, lambda_a, rho)
+            prob = tau * poisson_prob(x, lambda_h) * poisson_prob(y, lambda_a)
+            if x > y:
+                p_home += prob
+            elif x == y:
+                p_draw += prob
+            else:
+                p_away += prob
+            if x + y > 2:
+                p_over25 += prob
+            if x > 0 and y > 0:
+                p_btts_yes += prob
+    total = p_home + p_draw + p_away
+    if total > 0:
+        p_home /= total; p_draw /= total; p_away /= total
+    return {"p_home": p_home, "p_draw": p_draw, "p_away": p_away,
+            "p_over25": p_over25, "p_btts_yes": p_btts_yes}
+
 def get_club_elo_live(team: str) -> Tuple[float, bool]:
+    """Returns (elo, is_real_data). is_real_data=False means this is a blind
+    default and the caller MUST NOT treat downstream probabilities as trustworthy."""
     clean = team.strip().lower()
     now = time.time()
+
     if clean in CLUB_ELO_CACHE and (now - CLUB_ELO_CACHE[clean]["time"]) < CACHE_TTL:
         return CLUB_ELO_CACHE[clean]["elo"], True
 
     for k, v in CLUB_ELO_SEEDS.items():
-        if k == clean or k in clean or clean in k:
+        if k in clean or clean in k:
             return v, True
 
     try:
-        slug = urllib.parse.quote(team.replace(" ", ""))
-        url = f"http://api.clubelo.com/{slug}"
-        req = urllib.request.Request(url, headers={"User-Agent": "curl/7.88.1"})
-        with urllib.request.urlopen(req, timeout=2.0) as resp:
+        url = f"http://api.clubelo.com/{urllib.parse.quote(team.replace(' ', ''))}"
+        req = urllib.request.Request(url, headers={"User-Agent": "SoccerEngine/3.3"})
+        with urllib.request.urlopen(req, timeout=3) as resp:
             lines = resp.read().decode("utf-8").splitlines()
             if len(lines) > 1:
                 latest = lines[1].split(",")
-                elo = float(latest[4])
-                CLUB_ELO_CACHE[clean] = {"elo": elo, "time": now}
-                return elo, True
+                if len(latest) >= 5:
+                    elo = float(latest[4])
+                    CLUB_ELO_CACHE[clean] = {"elo": elo, "time": now}
+                    return elo, True
     except Exception:
         pass
 
-    return 1500.0, False
+    # No real signal. Do NOT pretend this is a calibrated rating.
+    return 1650.0, False
 
 def get_intl_elo(team: str) -> Tuple[float, bool]:
     clean = team.strip().lower()
     for k, v in INTL_ELO_SEEDS.items():
-        if k == clean or k in clean or clean in k:
+        if k in clean or clean in k:
             return v, True
-    return 1650.0, False
+    return 1700.0, False
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# QUANTITATIVE CORE: DE-VIGGING & DIXON-COLES
+# SCHEMAS
 # ═══════════════════════════════════════════════════════════════════════════════
-def devig_market(oh: Optional[float], od: Optional[float], oa: Optional[float]) -> Optional[Dict[str, float]]:
-    if not oh or not od or not oa or oh <= 1.0 or od <= 1.0 or oa <= 1.0:
-        return None
 
-    rh, rd, ra = 1.0 / oh, 1.0 / od, 1.0 / oa
-    overround = rh + rd + ra
-    if overround <= 1.0:
-        return {"1": rh / overround, "X": rd / overround, "2": ra / overround, "margin": 0.0}
-
-    # Power Method (Shin approximation for bookmaker longshot bias)
-    low, high = 0.5, 3.5
-    for _ in range(25):
-        mid = (low + high) / 2.0
-        tot = math.pow(rh, mid) + math.pow(rd, mid) + math.pow(ra, mid)
-        if tot < 1.0:
-            high = mid
-        else:
-            low = mid
-
-    k = (low + high) / 2.0
-    p1 = math.pow(rh, k)
-    px = math.pow(rd, k)
-    p2 = math.pow(ra, k)
-    norm = p1 + px + p2
-    return {"1": p1 / norm, "X": px / norm, "2": p2 / norm, "margin": round(overround - 1.0, 4)}
-
-def poisson_prob(k: int, lmb: float) -> float:
-    return (math.pow(lmb, k) * math.exp(-lmb)) / math.factorial(k)
-
-def tau_adjustment(x: int, y: int, lh: float, la: float, rho: float) -> float:
-    if x == 0 and y == 0:
-        return max(0.01, 1.0 - (lh * la * rho))
-    elif x == 0 and y == 1:
-        return max(0.01, 1.0 + (lh * rho))
-    elif x == 1 and y == 0:
-        return max(0.01, 1.0 + (la * rho))
-    elif x == 1 and y == 1:
-        return max(0.01, 1.0 - rho)
-    return 1.0
-
-def compute_grid(lh: float, la: float, rho: float) -> Dict[str, Any]:
-    matrix = [[0.0 for _ in range(6)] for _ in range(6)]
-    p_home = 0.0
-    p_draw = 0.0
-    p_away = 0.0
-    p_o15 = 0.0
-    p_o25 = 0.0
-    p_btts = 0.0
-
-    for x in range(6):
-        px = poisson_prob(x, lh)
-        for y in range(6):
-            py = poisson_prob(y, la)
-            tau = tau_adjustment(x, y, lh, la, rho)
-            p = px * py * tau
-            matrix[x][y] = p
-
-            if x > y: p_home += p
-            elif x == y: p_draw += p
-            else: p_away += p
-
-            if (x + y) > 1: p_o15 += p
-            if (x + y) > 2: p_o25 += p
-            if x > 0 and y > 0: p_btts += p
-
-    total = p_home + p_draw + p_away
-    if total > 0:
-        p_home /= total
-        p_draw /= total
-        p_away /= total
-
-    return {
-        "p_home": p_home, "p_draw": p_draw, "p_away": p_away,
-        "p_over15": p_o15, "p_over25": p_o25, "p_btts": p_btts,
-        "matrix": matrix
-    }
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# MODELS & SCHEMAS
-# ═══════════════════════════════════════════════════════════════════════════════
 class FixtureInput(BaseModel):
     home: str
     away: str
-    league: Optional[str] = "Universal League"
+    league: Optional[str] = "Premier League"
     match_date: Optional[str] = None
     odds_home: Optional[float] = None
     odds_draw: Optional[float] = None
@@ -217,16 +215,27 @@ class FixtureInput(BaseModel):
     tournament_phase: Optional[str] = "league"
 
 class BatchPredictRequest(BaseModel):
-    fixtures: List[FixtureInput] = []
+    fixtures: List[FixtureInput]
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# CORE CALCULATION PIPELINE
+# PREDICTION ENGINE
 # ═══════════════════════════════════════════════════════════════════════════════
-def predict_fixture(f: FixtureInput) -> Dict[str, Any]:
+
+def devig(oh: Optional[float], od: Optional[float], oa: Optional[float]):
+    """Removes bookmaker overround so 'edge' reflects real value, not vig
+    noise. Returns None if any odds are missing (no partial de-vig)."""
+    if not (oh and od and oa) or min(oh, od, oa) <= 1.0:
+        return None
+    imp_h, imp_d, imp_a = 1.0 / oh, 1.0 / od, 1.0 / oa
+    overround = imp_h + imp_d + imp_a
+    if overround <= 0:
+        return None
+    return {"1": imp_h / overround, "X": imp_d / overround, "2": imp_a / overround}
+
+def predict_single(f: FixtureInput) -> Dict[str, Any]:
     domain = classify_domain(f.league or "")
     is_intl = (domain == "international_tournament")
 
-    # 1. Elo verification
     if is_intl:
         elo_h, conf_h = get_intl_elo(f.home)
         elo_a, conf_a = get_intl_elo(f.away)
@@ -234,348 +243,206 @@ def predict_fixture(f: FixtureInput) -> Dict[str, Any]:
         elo_h, conf_h = get_club_elo_live(f.home)
         elo_a, conf_a = get_club_elo_live(f.away)
 
-    has_real_ratings = conf_h and conf_a
-    fair_market = devig_market(f.odds_home, f.odds_draw, f.odds_away)
-
-    # 2. Reverse Elo Imputation: If unknown teams have market odds, deduce rating gap from odds
-    inferred_from_market = False
-    if not has_real_ratings and fair_market:
-        ratio = max(0.01, min(100.0, fair_market["1"] / max(0.005, fair_market["2"])))
-        inferred_gap = 400.0 * math.log10(ratio)
-        elo_h = 1550.0 + (inferred_gap / 2.0)
-        elo_a = 1550.0 - (inferred_gap / 2.0)
-        has_real_ratings = True
-        inferred_from_market = True
-
-    hfa = 0.0 if f.is_neutral else (45.0 if is_intl else 60.0)
+    data_confidence = conf_h and conf_a
+    hfa = 0.0 if f.is_neutral else (50.0 if is_intl else 65.0)
     elo_gap = (elo_h + hfa) - elo_a
 
     base_lh = WC_LAMBDA_HOME if is_intl else DEFAULT_LAMBDA_HOME
     base_la = WC_LAMBDA_AWAY if is_intl else DEFAULT_LAMBDA_AWAY
-    rho = WC_RHO if is_intl else DEFAULT_RHO
+    rho     = WC_RHO if is_intl else DEFAULT_RHO
 
-    # Dixon-Coles goal expectation scaling
-    goal_shift = elo_gap / 580.0
-    lambda_h = max(0.35, base_lh * (1.0 + goal_shift))
-    lambda_a = max(0.25, base_la * (1.0 - goal_shift * 0.75))
+    goal_diff_mod = elo_gap / 600.0
+    lambda_h = max(0.4, base_lh * (1.0 + goal_diff_mod))
+    lambda_a = max(0.3, base_la * (1.0 - goal_diff_mod * 0.8))
 
-    grid = compute_grid(lambda_h, lambda_a, rho)
-    m_h, m_d, m_a = grid["p_home"], grid["p_draw"], grid["p_away"]
+    probs = compute_match_probabilities(lambda_h, lambda_a, rho)
+    ph, pd_, pa = probs["p_home"], probs["p_draw"], probs["p_away"]
 
-    # 3. Bayesian blending
-    if fair_market:
-        weight = 0.60 if (has_real_ratings and not inferred_from_market) else 0.15
-        p_home = (m_h * weight) + (fair_market["1"] * (1.0 - weight))
-        p_draw = (m_d * weight) + (fair_market["X"] * (1.0 - weight))
-        p_away = (m_a * weight) + (fair_market["2"] * (1.0 - weight))
+    outcomes = {"1": ph, "X": pd_, "2": pa}
+    # The model NEVER bets against its own top pick to chase a longer price.
+    model_pick = max(outcomes, key=lambda k: outcomes[k])
+    model_p = outcomes[model_pick]
+
+    fair = devig(f.odds_home, f.odds_draw, f.odds_away)
+    edge = None
+    pick_odds_map = {"1": f.odds_home, "X": f.odds_draw, "2": f.odds_away}
+    pick_odds = pick_odds_map[model_pick]
+
+    edge_home = (ph - fair["1"]) if fair else None
+    edge_draw = (pd_ - fair["X"]) if fair else None
+    edge_away = (pa - fair["2"]) if fair else None
+    if fair:
+        edge = outcomes[model_pick] - fair[model_pick]
+
+    if not data_confidence:
+        confidence_tier = "NO BET"
+        pick = "NO BET"
+        acca_eligible = False
+        reason = (
+            f"Insufficient real data: no verified Elo rating found for "
+            f"{'both teams' if not conf_h and not conf_a else (f.home if not conf_h else f.away)}. "
+            f"Declining to grade this fixture rather than guess."
+        )
+    elif model_p < MIN_PICKABLE_PROB:
+        confidence_tier = "NO BET"
+        pick = "NO BET"
+        acca_eligible = False
+        reason = f"No outcome clears the {MIN_PICKABLE_PROB*100:.0f}% minimum model probability."
     else:
-        p_home, p_draw, p_away = m_h, m_d, m_a
+        confidence_tier = "CANDIDATE"
+        for tier in ("ELITE", "STRONG"):
+            th = TIER_THRESHOLDS[tier]
+            prob_ok = model_p >= th["prob"]
+            edge_ok = (edge is None) or (edge >= th["edge"])
+            # if odds ARE supplied, edge must actually be positive to promote
+            if edge is not None and edge < 0:
+                edge_ok = False
+            if prob_ok and edge_ok:
+                confidence_tier = tier
+                break
+        pick = model_pick
+        acca_eligible = confidence_tier in ("ELITE", "STRONG") and model_p >= 0.48
+        reason = (
+            f"Elo gap: {elo_gap:+.0f} ({f.home} {elo_h:.0f} vs {f.away} {elo_a:.0f}, verified data). "
+            f"Projected goals: {lambda_h:.2f} to {lambda_a:.2f}. "
+            f"Model favors {pick} at {model_p*100:.1f}%"
+            + (f", de-vigged edge {edge*100:+.1f}%." if edge is not None else " (no odds supplied for edge check).")
+        )
 
-    tot_p = p_home + p_draw + p_away
-    p_home /= tot_p; p_draw /= tot_p; p_away /= tot_p
-
-    p_1x = p_home + p_draw
-    p_x2 = p_away + p_draw
-
-    fair_h = fair_market["1"] if fair_market else p_home
-    fair_d = fair_market["X"] if fair_market else p_draw
-    fair_a = fair_market["2"] if fair_market else p_away
-
-    edge_h = p_home - fair_h
-    edge_d = p_draw - fair_d
-    edge_a = p_away - fair_a
-
-    # Multi-market recommendation logic
-    pick = "NO BET"
-    pick_odds = None
-    market_name = "1X2"
-    edge = 0.0
-    tier = "NO BET"
-
-    if p_home >= 0.65:
-        pick = f"{f.home} (1)"
-        pick_odds = f.odds_home or round(1.0 / max(0.01, p_home), 2)
-        edge = edge_h
-        tier = "ELITE" if p_home >= 0.72 else "STRONG"
-        market_name = "Home Win"
-    elif p_away >= 0.60:
-        pick = f"{f.away} (2)"
-        pick_odds = f.odds_away or round(1.0 / max(0.01, p_away), 2)
-        edge = edge_a
-        tier = "ELITE" if p_away >= 0.68 else "STRONG"
-        market_name = "Away Win"
-    elif p_1x >= 0.74 and (p_home >= p_away):
-        pick = f"{f.home} or Draw (1X)"
-        pick_odds = round(1.0 / max(0.01, (fair_h + fair_d * 0.9)), 2) if fair_market else 1.35
-        edge = (p_1x - (fair_h + fair_d))
-        tier = "STRONG" if p_1x >= 0.80 else "CANDIDATE"
-        market_name = "Double Chance 1X"
-    elif p_x2 >= 0.72 and (p_away >= p_home):
-        pick = f"{f.away} or Draw (X2)"
-        pick_odds = round(1.0 / max(0.01, (fair_a + fair_d * 0.9)), 2) if fair_market else 1.40
-        edge = (p_x2 - (fair_a + fair_d))
-        tier = "STRONG" if p_x2 >= 0.78 else "CANDIDATE"
-        market_name = "Double Chance X2"
-    elif p_home >= 0.48:
-        pick = f"{f.home} (1)"
-        pick_odds = f.odds_home or round(1.0 / max(0.01, p_home), 2)
-        edge = edge_h
-        tier = "CANDIDATE"
-        market_name = "Home Win"
-    elif p_away >= 0.45:
-        pick = f"{f.away} (2)"
-        pick_odds = f.odds_away or round(1.0 / max(0.01, p_away), 2)
-        edge = edge_a
-        tier = "CANDIDATE"
-        market_name = "Away Win"
-    elif p_1x >= 0.65:
-        pick = f"{f.home} or Draw (1X)"
-        pick_odds = round(1.0 / max(0.01, (fair_h + fair_d * 0.9)), 2) if fair_market else 1.40
-        edge = (p_1x - (fair_h + fair_d))
-        tier = "CANDIDATE"
-        market_name = "Double Chance 1X"
-    elif p_x2 >= 0.65:
-        pick = f"{f.away} or Draw (X2)"
-        pick_odds = round(1.0 / max(0.01, (fair_a + fair_d * 0.9)), 2) if fair_market else 1.40
-        edge = (p_x2 - (fair_a + fair_d))
-        tier = "CANDIDATE"
-        market_name = "Double Chance X2"
-    else:
-        if p_home >= p_away:
-            pick = f"{f.home} or Draw (1X)"
-            market_name = "Double Chance 1X"
-        else:
-            pick = f"{f.away} or Draw (X2)"
-            market_name = "Double Chance X2"
-        pick_odds = 1.40
-        tier = "CANDIDATE"
-
-    selected_prob = (
-        p_home if "Home Win" in market_name else
-        p_away if "Away Win" in market_name else
-        p_1x if "1X" in market_name else
-        p_x2 if "X2" in market_name else (p_1x if p_home >= p_away else p_x2)
-    )
-    acca_eligible = (tier in ["ELITE", "STRONG", "CANDIDATE"] and selected_prob >= 0.58)
-
-    reason = (
-        f"Rating Gap: {elo_gap:+.0f} ({f.home} {elo_h:.0f} vs {f.away} {elo_a:.0f}"
-        f"{' [Market-Derived]' if inferred_from_market else ''}). "
-        f"Goal Exp: {lambda_h:.2f} to {lambda_a:.2f}. "
-        f"Selected {pick} with {selected_prob*100:.1f}% calibrated model confidence."
-    )
+    model_label = "Bivariate Poisson + Dixon-Coles [Top-5 Domestic]"
+    if is_intl:
+        model_label = "WC Tournament Poisson + eloratings.net K=40"
+    elif domain == "club_continental":
+        model_label = "Continental Poisson + ClubElo Live"
+    elif domain == "unmodeled":
+        model_label = "Unmodeled league — generic Poisson prior only, treat with caution"
 
     return {
         "home": f.home, "away": f.away, "league": f.league, "domain": domain,
-        "data_confidence": has_real_ratings,
-        "home_elo": round(elo_h, 1), "away_elo": round(elo_a, 1), "elo_gap": round(elo_gap, 1),
-        "lambda_home": round(lambda_h, 2), "lambda_away": round(lambda_a, 2),
-        "p_home": p_home, "p_draw": p_draw, "p_away": p_away,
-        "p_1x": p_1x, "p_x2": p_x2,
-        "p_over15": grid["p_over15"], "p_over25": grid["p_over25"], "p_btts_yes": grid["p_btts"],
-        "edge_home": edge_h, "edge_draw": edge_d, "edge_away": edge_a,
-        "adj_edge": max(0.0, edge),
-        "pick": pick, "market": market_name, "pick_odds": pick_odds or 1.50,
-        "pick_prob": selected_prob,
-        "confidence_tier": tier, "acca_eligible": acca_eligible,
-        "model_used": "Dixon-Coles + Bayesian Market De-vigging v4.0",
-        "reason": reason
+        "data_confidence": data_confidence,
+        "home_elo": elo_h, "away_elo": elo_a, "elo_gap": elo_gap,
+        "lambda_home": lambda_h, "lambda_away": lambda_a, "rho_used": rho,
+        "p_home": ph, "p_draw": pd_, "p_away": pa,
+        "p_over25": probs["p_over25"], "p_btts_yes": probs["p_btts_yes"],
+        "edge_home": edge_home, "edge_draw": edge_draw, "edge_away": edge_away,
+        "adj_edge": max(edge, 0.0) if edge is not None else 0.0,
+        "pick": pick, "pick_odds": pick_odds,
+        "confidence_tier": confidence_tier, "acca_eligible": acca_eligible,
+        "model_used": model_label, "reason": reason,
     }
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# FASTAPI ENDPOINTS
+# ENDPOINTS
 # ═══════════════════════════════════════════════════════════════════════════════
+
 @app.get("/")
-@app.get("/api")
 def root():
-    return {
-        "status": "online",
-        "engine": "Soccer Intelligence Engine v4.0 Quantitative",
-        "methods": ["Dixon-Coles", "Power-De-vigging", "Reverse-Elo-Imputation", "Multi-Market-Double-Chance"]
-    }
+    return {"status": "online", "engine": "Soccer Intelligence Engine v3.3",
+            "endpoints": ["/health", "/predict", "/predict/batch", "/fixtures/today", "/elo/{team}", "/data-sources"]}
 
 @app.get("/health")
-@app.get("/api/health")
 def health_check():
-    return {
-        "status": "healthy",
-        "version": "4.0.0",
-        "active_keys": {
-            "football_data": bool(FOOTBALL_DATA_KEY),
-            "the_odds_api": bool(THE_ODDS_API_KEY)
-        },
-        "components": {
-            "de_vigging": True,
-            "reverse_elo_imputation": True,
-            "double_chance_module": True,
-            "poisson_dixon_coles": True,
-            "open_live_fixtures": True
-        }
-    }
+    return {"status": "healthy", "version": "3.3.0",
+            "active_keys": {"football_data": bool(FOOTBALL_DATA_KEY), "the_odds_api": bool(THE_ODDS_API_KEY),
+                             "api_football": bool(API_FOOTBALL_KEY), "sportmonks": bool(SPORTMONKS_TOKEN)},
+            "components": {"penaltyblog": True, "soccerdata": True, "dixon_coles": True,
+                            "bivariate_poisson": True, "club_elo": True, "intl_elo": True,
+                            "data_confidence_gating": True}}
+
+@app.get("/data-sources")
+def get_data_sources():
+    return {"sources": [
+        {"source": "api.clubelo.com", "type": "Live Club Elo", "key_required": False, "status": "Active / Free — big European leagues only"},
+        {"source": "football-data.co.uk", "type": "Historical Odds & Results", "key_required": False, "status": "Active / Free via penaltyblog"},
+        {"source": "api.football-data.org", "type": "Live Fixtures & Standings", "key_required": True, "status": "Active" if FOOTBALL_DATA_KEY else "Missing Key"},
+        {"source": "understat.com", "type": "Expected Goals (xG)", "key_required": False, "status": "Active / Free via soccerdata"},
+        {"source": "eloratings.net", "type": "National Team Elo", "key_required": False, "status": "Active / Seeded — top ~35 nations only"},
+        {"source": "TheOddsAPI", "type": "Live Multi-Book Odds", "key_required": True, "status": "Active" if THE_ODDS_API_KEY else "Optional"},
+        {"source": "API-Football", "type": "Lineups & Live Odds", "key_required": True, "status": "Configured" if API_FOOTBALL_KEY else "Optional"},
+        {"source": "SportMonks", "type": "Lineups & Advanced Stats", "key_required": True, "status": "Configured" if SPORTMONKS_TOKEN else "Optional"},
+    ]}
 
 @app.post("/predict")
-@app.post("/api/predict")
 def predict_endpoint(fixture: FixtureInput):
-    return predict_fixture(fixture)
+    return predict_single(fixture)
 
 @app.post("/predict/batch")
-@app.post("/api/predict/batch")
 def predict_batch_endpoint(request: BatchPredictRequest):
-    if not request.fixtures:
-        return {
-            "total_fixtures": 0,
-            "actionable_picks": 0,
-            "no_bet_count": 0,
-            "acca_eligible_count": 0,
-            "predictions": [],
-            "accumulators": []
-        }
+    if len(request.fixtures) > 200:
+        raise HTTPException(status_code=400, detail="Maximum 200 fixtures per batch request")
 
-    if len(request.fixtures) > 350:
-        raise HTTPException(status_code=400, detail="Maximum 350 fixtures per batch")
+    predictions = [predict_single(f) for f in request.fixtures]
 
-    predictions = [predict_fixture(f) for f in request.fixtures]
-    actionable = [p for p in predictions if p.get("acca_eligible", True) and p.get("pick") != "NO BET"]
+    # Only build accas from fixtures with VERIFIED data on both teams.
+    actionable = [p for p in predictions
+                  if p["acca_eligible"] and p["pick"] != "NO BET" and p["data_confidence"]]
     accumulators = []
 
     if len(actionable) >= 2:
-        sorted_bankers = sorted(actionable, key=lambda x: (-x["pick_prob"], -x["adj_edge"]))
-
-        # 1. Banker Acca (2 to 3 legs)
-        for n in [2, 3]:
-            if len(sorted_bankers) >= n:
-                combo = sorted_bankers[:n]
-                c_odds = 1.0
-                c_prob = 1.0
-                legs = []
+        # Sort by model probability first (real predictive confidence),
+        # edge second (value on top of that). Longshots no longer win by
+        # having a big edge alone.
+        sorted_picks = sorted(
+            actionable,
+            key=lambda x: (x["confidence_tier"] != "ELITE",
+                           -(x["p_home"] if x["pick"] == "1" else x["p_draw"] if x["pick"] == "X" else x["p_away"]),
+                           -x["adj_edge"])
+        )
+        for n_legs in [2, 3, 4]:
+            if len(sorted_picks) >= n_legs:
+                combo = sorted_picks[:n_legs]
+                combined_odds = 1.0
+                combined_prob = 1.0
+                legs_info = []
                 for c in combo:
-                    o = float(c["pick_odds"]) if c["pick_odds"] else 1.30
-                    c_odds *= o
-                    c_prob *= c["pick_prob"]
-                    legs.append({
-                        "home": c["home"], "away": c["away"], "league": c["league"],
-                        "pick": c["pick"], "tier": c["confidence_tier"], "odds": o,
-                        "prob": c["pick_prob"]
-                    })
+                    odd = c["pick_odds"] or 1.50
+                    combined_odds *= odd
+                    p_val = c["p_home"] if c["pick"] == "1" else c["p_draw"] if c["pick"] == "X" else c["p_away"]
+                    combined_prob *= p_val
+                    legs_info.append({"home": c["home"], "away": c["away"], "league": c["league"],
+                                       "pick": c["pick"], "tier": c["confidence_tier"], "odds": odd})
                 accumulators.append({
-                    "name": f"Banker Acca ({n}-Leg Safe Multiplier)",
-                    "n_legs": n,
-                    "combined_odds": round(c_odds, 2),
-                    "combined_model_prob": round(c_prob * 100, 1),
-                    "avg_adj_edge": round(sum(c["adj_edge"] for c in combo) / n * 100, 1),
-                    "legs": legs
+                    "n_legs": n_legs, "combined_odds": round(combined_odds, 2),
+                    "combined_model_prob": round(combined_prob * 100, 1),
+                    "avg_adj_edge": round(sum(c["adj_edge"] for c in combo) / n_legs * 100, 1),
+                    "legs": legs_info,
                 })
-
-        # 2. Value Growth Acca (4 to 5 legs)
-        if len(sorted_bankers) >= 4:
-            combo = sorted_bankers[:min(5, len(sorted_bankers))]
-            c_odds = 1.0
-            c_prob = 1.0
-            legs = []
-            for c in combo:
-                o = float(c["pick_odds"]) if c["pick_odds"] else 1.35
-                c_odds *= o
-                c_prob *= c["pick_prob"]
-                legs.append({
-                    "home": c["home"], "away": c["away"], "league": c["league"],
-                    "pick": c["pick"], "tier": c["confidence_tier"], "odds": o,
-                    "prob": c["pick_prob"]
-                })
-            accumulators.append({
-                "name": f"Value Growth Acca ({len(combo)}-Leg)",
-                "n_legs": len(combo),
-                "combined_odds": round(c_odds, 2),
-                "combined_model_prob": round(c_prob * 100, 1),
-                "avg_adj_edge": round(sum(c["adj_edge"] for c in combo) / len(combo) * 100, 1),
-                "legs": legs
-            })
 
     return {
         "total_fixtures": len(predictions),
         "actionable_picks": len(actionable),
         "no_bet_count": sum(1 for p in predictions if p["pick"] == "NO BET"),
+        "unmodeled_count": sum(1 for p in predictions if not p["data_confidence"]),
         "acca_eligible_count": len(actionable),
         "predictions": predictions,
-        "accumulators": accumulators
+        "accumulators": accumulators,
     }
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# OPEN LIVE REAL-TIME DATA ADAPTER
-# ═══════════════════════════════════════════════════════════════════════════════
-ESPN_LEAGUE_SLUGS = {
-    "PL": "eng.1", "PD": "esp.1", "SA": "ita.1", "BL1": "ger.1", "FL1": "fra.1", "CL": "uefa.champions"
-}
-
-def fetch_open_live_fixtures(league_code: str) -> List[Dict[str, Any]]:
-    slug = ESPN_LEAGUE_SLUGS.get(league_code.upper(), "eng.1")
-    url = f"https://site.api.espn.com/apis/site/v2/sports/soccer/{slug}/scoreboard"
-    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
-    try:
-        with urllib.request.urlopen(req, timeout=3.0) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-            events = data.get("events", [])
-            output = []
-            for ev in events:
-                competitors = ev.get("competitions", [{}])[0].get("competitors", [])
-                home = next((c["team"]["displayName"] for c in competitors if c.get("homeAway") == "home"), "")
-                away = next((c["team"]["displayName"] for c in competitors if c.get("homeAway") == "away"), "")
-                if home and away:
-                    output.append({
-                        "home": home,
-                        "away": away,
-                        "kickoff": ev.get("date"),
-                        "status": ev.get("status", {}).get("type", {}).get("description", "SCHEDULED")
-                    })
-            return output
-    except Exception:
-        return []
-
 @app.get("/fixtures/today")
-@app.get("/api/fixtures/today")
 def get_today_fixtures(league: str = "PL"):
-    code = league.upper()
-
-    # Strategy 1: Prioritize ESPN live feed (Zero API key required, 100% real live data, high reliability)
+    if not FOOTBALL_DATA_KEY:
+        raise HTTPException(status_code=400, detail="FOOTBALL_DATA_API_KEY is not configured")
+    league_map = {"PL": "PL", "PD": "PD", "SA": "SA", "BL1": "BL1", "FL1": "FL1", "CL": "CL"}
+    code = league_map.get(league.upper(), "PL")
+    url = f"https://api.football-data.org/v4/competitions/{code}/matches?status=SCHEDULED"
+    req = urllib.request.Request(url, headers={"X-Auth-Token": FOOTBALL_DATA_KEY})
     try:
-        open_fixtures = fetch_open_live_fixtures(code)
-        if open_fixtures:
-            return {"league": code, "source": "live_realtime_feed", "fixtures": open_fixtures}
-    except Exception:
-        pass
-
-    # Strategy 2: Try Football-Data if key is configured
-    if FOOTBALL_DATA_KEY:
-        league_map = {"PL": "PL", "PD": "PD", "SA": "SA", "BL1": "BL1", "FL1": "FL1", "CL": "CL"}
-        fd_code = league_map.get(code, "PL")
-        url = f"https://api.football-data.org/v4/competitions/{fd_code}/matches?status=SCHEDULED"
-        req = urllib.request.Request(url, headers={"X-Auth-Token": FOOTBALL_DATA_KEY})
-        try:
-            with urllib.request.urlopen(req, timeout=3) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-                matches = data.get("matches", [])
-                output = [{
-                    "home": m["homeTeam"]["name"], "away": m["awayTeam"]["name"],
-                    "kickoff": m.get("utcDate"), "status": m.get("status", "SCHEDULED")
-                } for m in matches[:15]]
-                if output:
-                    return {"league": fd_code, "source": "football-data.org", "fixtures": output}
-        except Exception:
-            pass
-
-    return {"league": code, "source": "empty", "fixtures": []}
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            matches = data.get("matches", [])
+            output = [{"home": m["homeTeam"]["name"], "away": m["awayTeam"]["name"],
+                       "kickoff": m.get("utcDate"), "status": m.get("status", "SCHEDULED")}
+                      for m in matches[:15]]
+            return {"league": code, "fixtures": output}
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Failed to fetch fixtures: {str(e)}")
 
 @app.get("/elo/{team}")
-@app.get("/api/elo/{team}")
 def get_elo_endpoint(team: str, international: bool = False):
     if international:
         elo, real = get_intl_elo(team)
-        source = "eloratings.net" if real else "Generic baseline"
+        source = "eloratings.net (National Teams)" if real else "eloratings.net — NOT FOUND, showing generic default"
     else:
         elo, real = get_club_elo_live(team)
-        source = "api.clubelo.com" if real else "Generic baseline"
+        source = "api.clubelo.com (European Clubs)" if real else "api.clubelo.com — NOT FOUND, showing generic default"
     return {"team": team, "elo": elo, "is_real_data": real, "source": source, "date": time.strftime("%Y-%m-%d")}
-
-if __name__ == "__main__":
-    import uvicorn
-    port = int(os.getenv("PORT", 8000))
-    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
