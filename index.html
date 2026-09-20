@@ -71,11 +71,13 @@ select option{background:var(--bg3)}
 .pred-pick{text-align:right}
 .pred-pick-label{font-size:10px;color:var(--text2);margin-bottom:2px}
 .pred-pick-val{font-size:16px;font-weight:700}
-.pred-body{padding:0 16px 14px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.pred-body{padding:0 16px 10px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 @media(max-width:600px){.pred-body{grid-template-columns:repeat(2,1fr)}}
 .pred-stat{background:var(--bg3);border-radius:var(--radius2);padding:8px 10px;text-align:center}
 .pred-stat-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
 .pred-stat-val{font-size:14px;font-weight:600;margin-top:2px}
+.sig-row{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 12px}
+.sig-chip{font-size:10px;padding:2px 9px;border-radius:12px;border:1px solid var(--border2);font-family:var(--mono);color:var(--text2);white-space:nowrap}
 .prob-bar{display:flex;height:6px;border-radius:3px;overflow:hidden;margin:10px 16px 0;gap:1px}
 .pb-h{background:var(--blue)}.pb-d{background:var(--text3)}.pb-a{background:var(--red)}
 .prob-labels{display:flex;justify-content:space-between;padding:4px 16px 12px;font-size:11px;color:var(--text2);gap:8px}
@@ -126,6 +128,7 @@ select option{background:var(--bg3)}
   .api-url-badge{display:none}
 }
 </style>
+<base target="_blank">
 </head>
 <body>
 
@@ -136,7 +139,7 @@ select option{background:var(--bg3)}
     <div class="logo-icon">⚽</div>
     <div>
       <div class="logo-text">Soccer Intelligence Engine</div>
-      <div class="logo-sub">Market-anchored Poisson · Elo supplement · Probability-ranked accas</div>
+      <div class="logo-sub">Fitted Dixon-Coles · xG / weather / squad signals · Probability-ranked accas</div>
     </div>
   </div>
   <div class="header-status">
@@ -170,10 +173,10 @@ select option{background:var(--bg3)}
     </div>
     <div class="form-grid" style="margin-top:12px">
       <div><label>Competition / League</label><input id="p-league" placeholder="e.g. England • Premier League" value="England • Premier League"/></div>
-      <div><label>Match Date (optional)</label><input id="p-date" type="date"/></div>
+      <div><label>Match Date (optional — enables weather + rest-day signals)</label><input id="p-date" type="date"/></div>
     </div>
 
-    <div class="section-title" style="margin-top:18px">Bookmaker Odds (strongly recommended — main signal)</div>
+    <div class="section-title" style="margin-top:18px">Bookmaker Odds (optional — enables edge calculation)</div>
     <div class="form-grid-3">
       <div><label>Home Win Odds</label><input id="p-oh" type="number" step="0.01" min="1.01" placeholder="e.g. 2.10"/></div>
       <div><label>Draw Odds</label><input id="p-od" type="number" step="0.01" min="1.01" placeholder="e.g. 3.40"/></div>
@@ -267,20 +270,21 @@ select option{background:var(--bg3)}
 <!-- ABOUT -->
 <div class="page" id="page-about">
   <div class="stats-grid">
-    <div class="stat-box"><div class="stat-box-val" style="color:var(--gold)">4.0.0</div><div class="stat-box-label">Engine Version</div></div>
-    <div class="stat-box"><div class="stat-box-val" id="elo-count" style="color:var(--text3)">—</div><div class="stat-box-label">ClubElo ratings loaded</div></div>
+    <div class="stat-box"><div class="stat-box-val" style="color:var(--gold)" id="ver-box">3.4.0</div><div class="stat-box-label">Engine Version</div></div>
+    <div class="stat-box"><div class="stat-box-val" id="fit-count" style="color:var(--text3)">—</div><div class="stat-box-label">Fitted leagues cached</div></div>
     <div class="stat-box"><div class="stat-box-val" id="pb-status" style="color:var(--text3)">—</div><div class="stat-box-label">penaltyblog</div></div>
     <div class="stat-box"><div class="stat-box-val" id="sd-status" style="color:var(--text3)">—</div><div class="stat-box-label">soccerdata</div></div>
   </div>
 
   <div class="card">
-    <div class="section-title">How predictions are made</div>
+    <div class="section-title">How predictions are made (v3.4)</div>
     <table class="tbl">
       <tr><th>Step</th><th>What it does</th></tr>
-      <tr><td><strong>1. Market</strong></td><td>Bookmaker 1X2 odds are de-vigged (power method) into fair probabilities. This is the main signal.</td></tr>
-      <tr><td><strong>2. Elo</strong></td><td>If both teams match a real senior men's ClubElo rating, an Elo-based Poisson model contributes 20%. If it disagrees with the market by more than 25 points it is discarded.</td></tr>
-      <tr><td><strong>3. Poisson</strong></td><td>Goal rates are fitted to the blended probabilities (Dixon-Coles low-score correction) to derive Over 2.5 / BTTS. These use a fixed 2.65 total-goals assumption, so treat them as rough.</td></tr>
-      <tr><td><strong>4. Accas</strong></td><td>Legs need odds, a market-based probability and a win chance of 60% or more. The highest-probability legs are combined into 2–6 leg accas.</td></tr>
+      <tr><td><strong>1. Team strength</strong></td><td>ClubElo / international seeds for the baseline; for the top-5 leagues a <strong>fitted Dixon-Coles MLE</strong> on football-data.co.uk (3 seasons, time-decay ξ=0.0035) supplies attack/defence ratings, home advantage and ρ. Promoted teams are covered even when ClubElo isn't.</td></tr>
+      <tr><td><strong>2. Signal nudges</strong></td><td>npxG-per-90 nudge (soccerdata/FBref, when reachable), Open-Meteo weather factor (wind/rain/heat), rest-day fatigue edge, and API-Football injury counts when a key is set. Each is small, multiplicative, and shown as chips on every card.</td></tr>
+      <tr><td><strong>3. Poisson matrix</strong></td><td>λ_home / λAway run through a Dixon-Coles-corrected scoreline matrix → 1X2, Over 2.5 and BTTS probabilities.</td></tr>
+      <tr><td><strong>4. Market check</strong></td><td>Odds are de-vigged (Shin via penaltyblog when importable, proportional fallback). Edge only sizes confidence on the outcome the model already favours — it never chases a longer price. No verified data on both teams → honest NO BET.</td></tr>
+      <tr><td><strong>5. Accas</strong></td><td>Legs must be ELITE/STRONG tier with ≥48% model probability and real odds. Sorted probability-first, then edge; combined into 2–6 leg accas with model win probability and EV shown per acca.</td></tr>
     </table>
   </div>
 
@@ -442,17 +446,31 @@ function toast(msg, type = "success") {
 function setLoading(container, msg = "Computing predictions…") {
   document.getElementById(container).innerHTML = `<div class="loading"><div class="spinner"></div>${msg}</div>`;
 }
-function pct(v) { return v != null ? (v * 100).toFixed(1) + "%" : "—"; }
-function num(v, d = 2) { return v != null ? parseFloat(v).toFixed(d) : "—"; }
+function pct(v) { return v != null && isFinite(v) ? (v * 100).toFixed(1) + "%" : "—"; }
+function num(v, d = 2) { return v != null && isFinite(v) ? parseFloat(v).toFixed(d) : "—"; }
 function domainClass(d) {
   if (d === "domestic_top5") return "domain-domestic";
   if (d === "international_tournament") return "domain-intl";
   if (d === "club_continental") return "domain-continental";
   return "domain-friendly";
 }
+function pickProb(p) {
+  if (p.pick === "1") return p.p_home;
+  if (p.pick === "2") return p.p_away;
+  if (p.pick === "X") return p.p_draw;
+  return null;
+}
+function pickLabel(pick) {
+  if (pick === "1") return "Home (1)";
+  if (pick === "2") return "Away (2)";
+  if (pick === "X") return "Draw (X)";
+  return "NO BET";
+}
 function tierCard(tier) {
-  const label = tier === "REJECT" ? "TOO CLOSE" : (tier || "NO BET");
-  return `<span class="tier tier-${tier || "REJECT"}">${label}</span>`;
+  const t = tier || "NO BET";
+  const label = t === "NO BET" ? "NO BET" : t;
+  const cls = (t === "ELITE" || t === "STRONG" || t === "CANDIDATE") ? t : "REJECT";
+  return `<span class="tier tier-${cls}">${label}</span>`;
 }
 async function apiFetch(path, options = {}) {
   const url = API_BASE.replace(/\/$/, "") + path;
@@ -481,9 +499,9 @@ async function checkHealth() {
   document.getElementById("apiUrlBadge").textContent = API_BASE.replace("https://", "");
   try {
     const h = await apiFetch("/health");
-    const n = h.clubelo && h.clubelo.clubs_loaded;
-    dot.style.background = n ? "var(--green)" : "var(--amber)";
-    txt.textContent = n ? `Engine Online · ${n} club ratings` : "Engine Online · ratings loading / not loaded";
+    const ok = h.status === "healthy";
+    dot.style.background = ok ? "var(--green)" : "var(--amber)";
+    txt.textContent = ok ? `Engine Online · v${h.version || "?"}` : "Engine degraded";
     return h;
   } catch {
     dot.style.background = "var(--red)";
@@ -495,9 +513,10 @@ async function checkHealth() {
 async function loadAbout() {
   try {
     const h = await apiFetch("/health");
-    const n = h.clubelo && h.clubelo.clubs_loaded;
-    const el = document.getElementById("elo-count");
-    el.textContent = n || 0; el.style.color = n ? "var(--green)" : "var(--red)";
+    document.getElementById("ver-box").textContent = h.version || "—";
+    const fit = (h.fitted_leagues_cached || []).length;
+    const fe = document.getElementById("fit-count");
+    fe.textContent = fit; fe.style.color = fit ? "var(--green)" : "var(--text3)";
     for (const [id, key] of [["pb-status", "penaltyblog"], ["sd-status", "soccerdata"]]) {
       const b = document.getElementById(id);
       const on = h.components && h.components[key];
@@ -506,22 +525,43 @@ async function loadAbout() {
     }
     const ds = await apiFetch("/data-sources");
     document.getElementById("sources-tbl").innerHTML =
-      `<tr><th>Source</th><th>Status</th></tr>` +
-      ds.sources.map(s => `<tr><td><strong>${s.source}</strong></td><td>${s.status}</td></tr>`).join("");
+      `<tr><th>Source</th><th>Provides</th><th>Status</th></tr>` +
+      (ds.sources || []).map(s =>
+        `<tr><td><strong>${s.source}</strong>${s.key_required ? " 🔑" : ""}</td><td>${s.type || ""}</td><td>${s.status}</td></tr>`).join("");
   } catch (e) {
     document.getElementById("sources-tbl").innerHTML = `<tr><td style="color:var(--red)">${e.message}</td></tr>`;
   }
 }
 
+// ═══════════ SIGNAL CHIPS (v3.4 diagnostics) ═══════════
+function signalChips(p) {
+  const chips = [];
+  if (p.fitted_dc) chips.push(`<span class="sig-chip" style="color:var(--green);border-color:rgba(34,197,94,.4)">Fitted DC · ${p.fitted_dc.n_matches_fitted}m · att ${p.fitted_dc.att_home}/${p.fitted_dc.att_away}</span>`);
+  if (p.rest_edge) chips.push(`<span class="sig-chip" style="color:var(--blue);border-color:rgba(59,130,246,.4)">Rest ${p.rest_edge.rest_home_days}d vs ${p.rest_edge.rest_away_days}d</span>`);
+  if (p.xg_signal && (p.xg_signal.home_ratio || p.xg_signal.away_ratio)) {
+    const parts = [];
+    if (p.xg_signal.home_ratio) parts.push("H " + p.xg_signal.home_ratio.toFixed(2) + "x");
+    if (p.xg_signal.away_ratio) parts.push("A " + p.xg_signal.away_ratio.toFixed(2) + "x");
+    chips.push(`<span class="sig-chip" style="color:var(--purple);border-color:rgba(168,85,247,.4)">npxG ${parts.join(" · ")}</span>`);
+  }
+  if (p.weather) chips.push(`<span class="sig-chip" style="color:var(--amber);border-color:rgba(245,158,11,.4)">Weather: ${p.weather.wind_kmh} km/h · x${p.weather.goal_factor}</span>`);
+  if (p.squad_signal) chips.push(`<span class="sig-chip" style="color:var(--red);border-color:rgba(239,68,68,.4)">Injuries ${p.squad_signal.injuries_home}v${p.squad_signal.injuries_away}</span>`);
+  return chips.length ? `<div class="sig-row">${chips.join("")}</div>` : "";
+}
+
 // ═══════════ RENDERERS ═══════════
 function renderPredCard(p, matchOrder = null) {
-  const tier = p.confidence_tier || "REJECT";
-  const cls = tier.toLowerCase();
+  const tier = p.confidence_tier || "NO BET";
+  const cls = (tier === "ELITE" || tier === "STRONG" || tier === "CANDIDATE") ? tier.toLowerCase() : "reject";
   const pickColor = tier === "ELITE" ? "var(--green)" : tier === "STRONG" ? "var(--blue)"
                   : tier === "CANDIDATE" ? "var(--amber)" : "var(--text3)";
   const ph = (p.p_home || 0) * 100, pd = (p.p_draw || 0) * 100, pa = (p.p_away || 0) * 100;
   const domain_lbl = (p.domain || "unknown").replace(/_/g, " ");
-  const pickLbl = p.pick === "1" ? "Home (1)" : p.pick === "2" ? "Away (2)" : "Draw (X)";
+  const pp = pickProb(p);
+  const fair = pp ? 1 / pp : null;
+  const dq = p.data_confidence
+    ? `<span class="domain-pill domain-domestic" style="margin-left:4px">verified data</span>`
+    : `<span class="domain-pill domain-intl" style="margin-left:4px">no verified data</span>`;
 
   const edgeSection = p.edge_home != null ? `
     <div class="pred-stat"><div class="pred-stat-label">vs Fair Price H/D/A</div>
@@ -540,12 +580,12 @@ function renderPredCard(p, matchOrder = null) {
       <div class="pred-meta">
         ${p.league}
         <span class="domain-pill ${domainClass(p.domain)}" style="margin-left:6px">${domain_lbl}</span>
-        <span class="domain-pill domain-friendly" style="margin-left:4px">${p.data_quality || ""}</span>
+        ${dq}
       </div>
     </div>
     <div class="pred-pick">
-      <div class="pred-pick-label">Pick · ${pct(p.p_pick)}</div>
-      <div class="pred-pick-val" style="color:${pickColor}">${pickLbl}${p.pick_odds ? ` @ ${num(p.pick_odds,2)}` : ""}</div>
+      <div class="pred-pick-label">Pick${pp != null ? ` · ${pct(pp)}` : ""}</div>
+      <div class="pred-pick-val" style="color:${pickColor}">${pickLabel(p.pick)}${p.pick_odds ? ` @ ${num(p.pick_odds,2)}` : ""}</div>
       <div style="margin-top:4px">${tierCard(tier)}</div>
     </div>
   </div>
@@ -562,16 +602,20 @@ function renderPredCard(p, matchOrder = null) {
   </div>
 
   <div class="pred-body">
-    <div class="pred-stat"><div class="pred-stat-label">BTTS (rough)</div><div class="pred-stat-val">${pct(p.p_btts_yes)}</div></div>
-    <div class="pred-stat"><div class="pred-stat-label">Over 2.5 (rough)</div><div class="pred-stat-val">${pct(p.p_over25)}</div></div>
+    <div class="pred-stat"><div class="pred-stat-label">BTTS</div><div class="pred-stat-val">${pct(p.p_btts_yes)}</div></div>
+    <div class="pred-stat"><div class="pred-stat-label">Over 2.5</div><div class="pred-stat-val">${pct(p.p_over25)}</div></div>
     <div class="pred-stat"><div class="pred-stat-label">λ Home / Away</div>
       <div class="pred-stat-val" style="font-family:var(--mono);font-size:12px">${num(p.lambda_home,2)} / ${num(p.lambda_away,2)}</div></div>
     <div class="pred-stat"><div class="pred-stat-label">Fair odds (pick)</div>
-      <div class="pred-stat-val" style="font-family:var(--mono)">${num(p.fair_odds,2)}</div></div>
+      <div class="pred-stat-val" style="font-family:var(--mono)">${num(fair,2)}</div></div>
     ${edgeSection}
+    <div class="pred-stat"><div class="pred-stat-label">Adj. Edge</div>
+      <div class="pred-stat-val" style="color:${(p.adj_edge||0)>=0.04?'var(--green)':'var(--text2)'}">${p.adj_edge != null ? num(p.adj_edge*100,1)+"%" : "—"}</div></div>
     <div class="pred-stat"><div class="pred-stat-label">Acca Eligible</div>
       <div class="pred-stat-val" style="color:${p.acca_eligible?'var(--green)':'var(--text3)'}">${p.acca_eligible ? "✓ Yes" : "✗ No"}</div></div>
   </div>
+
+  ${signalChips(p)}
 
   <div class="pred-reason">
     <strong style="color:var(--text2)">Model:</strong> ${p.model_used || "—"}<br/>
@@ -586,10 +630,10 @@ function renderAccaCard(a, rank) {
     <div class="acca-leg">
       <div class="leg-num">${i+1}</div>
       <div class="leg-teams"><strong>${l.home} vs ${l.away}</strong><br/>
-        <span style="color:var(--text2);font-size:11px">${l.league} · win prob ${((l.prob||0)*100).toFixed(1)}%</span>
+        <span style="color:var(--text2);font-size:11px">${l.league} · win prob ${pct(l.prob)}</span>
       </div>
       ${tierCard(l.tier)}
-      <span style="font-size:12px;font-weight:600">${l.pick}</span>
+      <span style="font-size:12px;font-weight:600">${pickLabel({pick: l.pick})}</span>
       <span class="leg-odds">@ ${num(l.odds,2)}</span>
     </div>`).join("");
 
@@ -608,6 +652,33 @@ function renderAccaCard(a, rank) {
   </div>
   ${legs}
 </div>`;
+}
+
+// ═══════════ ACCA BUILDER (mirrors backend rules, works on the whole slate) ═══════════
+function buildAccas(preds) {
+  const eligible = preds.filter(p => p.acca_eligible && p.pick && p.pick !== "NO BET" && p.pick_odds != null);
+  const decorated = eligible.map(p => ({ p, prob: pickProb(p) || 0 }));
+  decorated.sort((a, b) =>
+    ((a.p.confidence_tier !== "ELITE") ? 1 : 0) - ((b.p.confidence_tier !== "ELITE") ? 1 : 0)
+    || b.prob - a.prob
+    || ((b.p.adj_edge || 0) - (a.p.adj_edge || 0)));
+  const sorted = decorated.map(o => o.p);
+  const accas = [];
+  for (const n of [2, 3, 4, 5, 6]) {
+    if (sorted.length < n) continue;
+    const combo = sorted.slice(0, n);
+    const combined_odds = combo.reduce((a, c) => a * (c.pick_odds || 1.5), 1);
+    const combined_prob = combo.reduce((a, c) => a * (pickProb(c) || 0), 1);
+    accas.push({
+      n_legs: n,
+      combined_odds,
+      combined_model_prob: combined_prob * 100,
+      expected_value_pct: (combined_prob * combined_odds - 1) * 100,
+      legs: combo.map(c => ({ home: c.home, away: c.away, league: c.league, pick: c.pick,
+                              tier: c.confidence_tier, odds: c.pick_odds, prob: pickProb(c) }))
+    });
+  }
+  return accas;
 }
 
 // ═══════════ SINGLE PREDICT ═══════════
@@ -630,7 +701,7 @@ async function runSinglePredict() {
   try {
     const p = await apiFetch("/predict", { method: "POST", body: JSON.stringify(body) });
     document.getElementById("single-result").innerHTML = renderPredCard(p);
-    toast(`Prediction: ${p.pick} [${p.confidence_tier}]`);
+    toast(`Prediction: ${pickLabel(p.pick)} [${p.confidence_tier}]`);
   } catch (e) {
     document.getElementById("single-result").innerHTML = `<div class="card" style="border-color:var(--red)">${e.message}</div>`;
     toast(e.message, "error");
@@ -640,8 +711,8 @@ async function runSinglePredict() {
 function fillExample(type) {
   const set = (id, v) => document.getElementById(id).value = v;
   if (type === "domestic") {
-    set("p-home", "Arsenal"); set("p-away", "Manchester City"); set("p-league", "England • Premier League");
-    set("p-oh", "3.20"); set("p-od", "3.50"); set("p-oa", "2.20");
+    set("p-home", "Arsenal"); set("p-away", "Chelsea"); set("p-league", "England • Premier League");
+    set("p-oh", "2.10"); set("p-od", "3.40"); set("p-oa", "3.60");
     document.getElementById("p-neutral").classList.remove("on"); set("p-phase", "league");
   } else {
     set("p-home", "France"); set("p-away", "Brazil"); set("p-league", "FIFA WCQ");
@@ -650,7 +721,7 @@ function fillExample(type) {
   }
 }
 
-// ═══════════ BATCH: one request for the whole slate ═══════════
+// ═══════════ BATCH: chunked requests, merged in order, accas built client-side ═══════════
 async function runBatch() {
   const raw = document.getElementById("batch-json").value.trim();
   if (!raw) { toast("Paste matches or JSON first", "error"); return; }
@@ -660,31 +731,52 @@ async function runBatch() {
 
   setLoading("batch-result", `Running ${fixtures.length} predictions…`);
   try {
-    const data = await apiFetch("/predict/batch", { method: "POST", body: JSON.stringify({ fixtures }) });
-    const preds = data.predictions || [];
-    const q = data.quality_counts || {};
+    const CHUNK = 100; // backend hard limit is 200 per request
+    let preds = [];
+    for (let i = 0; i < fixtures.length; i += CHUNK) {
+      const data = await apiFetch("/predict/batch", {
+        method: "POST",
+        body: JSON.stringify({ fixtures: fixtures.slice(i, i + CHUNK) })
+      });
+      preds.push(...(data.predictions || []));
+      if (i + CHUNK < fixtures.length) {
+        document.querySelector("#batch-result .loading").lastChild.textContent =
+          `Running ${fixtures.length} predictions… (${preds.length} done)`;
+      }
+    }
+
+    const actionable = preds.filter(p => p.pick && p.pick !== "NO BET").length;
+    const accaEligible = preds.filter(p => p.acca_eligible).length;
+    const q = { "market+rating": 0, "market": 0, "prior": 0 };
+    preds.forEach(p => {
+      const m = p.pick_odds != null, r = !!p.data_confidence;
+      if (m && r) q["market+rating"]++;
+      else if (m) q["market"]++;
+      else q["prior"]++;
+    });
 
     let html = `
 <div class="stats-grid" style="margin-top:16px">
-  <div class="stat-box"><div class="stat-box-val" style="color:var(--gold)">${data.total_fixtures}</div><div class="stat-box-label">Fixtures Predicted</div></div>
-  <div class="stat-box"><div class="stat-box-val" style="color:var(--green)">${data.actionable_picks}</div><div class="stat-box-label">Confident Picks</div></div>
-  <div class="stat-box"><div class="stat-box-val" style="color:var(--text3)">${data.no_bet_count}</div><div class="stat-box-label">Too Close To Call</div></div>
-  <div class="stat-box"><div class="stat-box-val" style="color:var(--blue)">${data.acca_eligible_count}</div><div class="stat-box-label">Acca Eligible</div>
-    <div class="stat-box-sub">market+rating ${q["market+rating"]||0} · market ${q["market"]||0} · prior ${q["prior"]||0}</div></div>
+  <div class="stat-box"><div class="stat-box-val" style="color:var(--gold)">${preds.length}</div><div class="stat-box-label">Fixtures Predicted</div></div>
+  <div class="stat-box"><div class="stat-box-val" style="color:var(--green)">${actionable}</div><div class="stat-box-label">Actionable Picks</div></div>
+  <div class="stat-box"><div class="stat-box-val" style="color:var(--text3)">${preds.length - actionable}</div><div class="stat-box-label">No Bet</div></div>
+  <div class="stat-box"><div class="stat-box-val" style="color:var(--blue)">${accaEligible}</div><div class="stat-box-label">Acca Eligible</div>
+    <div class="stat-box-sub">market+data ${q["market+rating"]} · market ${q["market"]} · prior ${q["prior"]}</div></div>
 </div>`;
 
-    if ((data.accumulators || []).length) {
+    const accas = buildAccas(preds);
+    if (accas.length) {
       html += `<div class="section-title" style="margin:16px 0 12px">Accumulators (highest win probability first)</div>`;
-      data.accumulators.forEach((a, i) => { html += renderAccaCard(a, i + 1); });
+      accas.forEach((a, i) => { html += renderAccaCard(a, i + 1); });
     } else {
-      html += `<div class="card" style="color:var(--text2)">No accumulator: fewer than 2 fixtures had odds plus a win probability of 60% or more.</div>`;
+      html += `<div class="card" style="color:var(--text2)">No accumulator: fewer than 2 fixtures reached STRONG/ELITE tier with ≥48% model probability and real odds.</div>`;
     }
 
     html += `<div class="section-title" style="margin:20px 0 12px">All Match Predictions (order as provided)</div>`;
     preds.forEach((p, idx) => { html += renderPredCard(p, idx + 1); });
 
     document.getElementById("batch-result").innerHTML = html;
-    toast(`Predicted ${data.total_fixtures} fixtures`);
+    toast(`Predicted ${preds.length} fixtures`);
   } catch (e) {
     document.getElementById("batch-result").innerHTML = `<div class="card" style="border-color:var(--red)">${e.message}</div>`;
     toast(e.message, "error");
