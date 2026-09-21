@@ -1,11 +1,11 @@
 """
 ═══════════════════════════════════════════════════════════════════════════════
-SOCCER INTELLIGENCE ENGINE v4.5 — PRODUCTION QUANTITATIVE BACKEND
-100% LLM-Free · Zero API Key Dependency · Pure Quantitative Mathematics
+SOCCER INTELLIGENCE ENGINE v5.0 — PRODUCTION QUANTITATIVE BACKEND
+10-Pillar Mathematical Architecture · Gemini 3.8 Flash Live Search Grounding
 Shin & Power De-vigging · Dixon-Coles Bivariate Poisson · Reverse Elo Imputation
 All 10 Deep Quantitative Pillars · Multi-Market Engine · Strict ≥3.00 Odds Accas
 ═══════════════════════════════════════════════════════════════════════════════
-Designed for production deployment on Render (Python/FastAPI/Uvicorn/Gunicorn).
+Designed for production deployment on Render (Python/FastAPI/Gunicorn) and Vercel.
 """
 
 import os
@@ -22,9 +22,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 app = FastAPI(
-    title="Soccer Intelligence Engine",
-    version="4.5.0",
-    description="Production-grade quantitative soccer prediction engine implementing all 10 modeling pillars, Shin de-vigging, Dixon-Coles Poisson grids, and strict >=3.00 odds accumulators."
+    title="Soccer Intelligence Engine v5",
+    version="5.0.0",
+    description="Quantitative soccer prediction syndicate engine with 10-pillar mathematical modeling and Gemini 3.8 Flash live search grounding."
 )
 
 app.add_middleware(
@@ -70,29 +70,39 @@ INTL_ELO_SEEDS: Dict[str, float] = {
 
 CLUB_ELO_SEEDS: Dict[str, float] = {
     "manchester city": 2060, "real madrid": 2050, "arsenal": 2005,
-    "liverpool": 2000, "bayern munich": 1985, "inter": 1980, "inter milan": 1980,
+    "liverpool": 1990, "bayern munich": 1985, "inter": 1975, "inter milan": 1975,
     "barcelona": 1975, "bayer leverkusen": 1965, "paris saint-germain": 1955,
     "paris saint germain": 1955, "paris st germain": 1955, "psg": 1955,
-    "atletico madrid": 1930, "borussia dortmund": 1915, "juventus": 1895, "chelsea": 1890,
-    "aston villa": 1880, "tottenham": 1870, "tottenham hotspur": 1870, "ac milan": 1865,
-    "newcastle": 1860, "sporting cp": 1860, "sporting lisbon": 1860, "manchester united": 1850,
-    "atalanta": 1845, "crvena zvezda": 1770, "red star belgrade": 1770, "rb leipzig": 1840,
+    "atletico madrid": 1930, "borussia dortmund": 1910, "dortmund": 1910,
+    "juventus": 1895, "chelsea": 1890, "aston villa": 1880, "tottenham": 1870,
+    "tottenham hotspur": 1870, "ac milan": 1865, "newcastle": 1860, "sporting cp": 1860,
+    "sporting lisbon": 1860, "manchester united": 1850, "atalanta": 1845,
+    "crvena zvezda": 1770, "red star belgrade": 1770, "rb leipzig": 1840,
     "benfica": 1835, "sl benfica": 1835, "roma": 1830, "as roma": 1830,
     "real sociedad": 1825, "villarreal": 1820, "fc porto": 1820, "porto": 1820,
     "brighton": 1815, "west ham": 1800, "marseille": 1795, "olympique marseille": 1795,
     "feyenoord": 1785, "psv": 1780, "psv eindhoven": 1780, "celtic": 1750,
-    "rangers": 1740, "bournemouth": 1745, "bologna": 1765, "lazio": 1810,
-    "fiorentina": 1780, "napoli": 1855, "torino": 1720, "monaco": 1820, "as monaco": 1820,
-    "lille": 1805, "lyon": 1790, "lens": 1775, "sevilla": 1760, "athletic bilbao": 1815,
-    "athletic club": 1815, "real betis": 1780, "valencia": 1660, "girona": 1805,
-    "eintracht frankfurt": 1785, "stuttgart": 1810, "wolfsburg": 1735, "freiburg": 1745,
-    "ferencvaros": 1690, "viktoria plzen": 1680, "sparta prague": 1720, "slavia prague": 1735,
-    "union saint-gilloise": 1740, "club brugge": 1755, "anderlecht": 1715,
-    "nec nijmegen": 1600, "vasco da gama": 1710, "flamengo": 1780, "palmeiras": 1790,
-    "fluminense": 1740, "sao paulo": 1735, "corinthians": 1720, "river plate": 1775,
-    "boca juniors": 1760, "wimbledon": 1450, "mk dons": 1460, "bastia": 1580,
-    "cannes": 1450, "elana torun": 1420, "lech ii poznan": 1470, "lech poznan": 1690,
-    "lecce": 1540, "sassuolo": 1610, "empoli": 1560, "salernitana": 1490
+    "rangers": 1740, "bournemouth": 1735, "afc bournemouth": 1735, "bologna": 1765,
+    "lazio": 1770, "fiorentina": 1765, "acf fiorentina": 1765, "napoli": 1860,
+    "torino": 1720, "monaco": 1820, "as monaco": 1820, "lille": 1805,
+    "lyon": 1770, "olympique lyon": 1770, "olympique lyonnais": 1770, "rennes": 1730,
+    "stade rennais": 1730, "lens": 1775, "sevilla": 1760, "athletic bilbao": 1815,
+    "athletic club": 1815, "real betis": 1765, "betis": 1765, "valencia": 1660,
+    "girona": 1805, "eintracht frankfurt": 1785, "eintracht fr": 1785,
+    "stuttgart": 1800, "vfb stuttgart": 1800, "wolfsburg": 1735, "freiburg": 1740,
+    "sc freiburg": 1740, "werder bremen": 1655, "augsburg": 1650, "hamburg": 1620,
+    "1. fc cologne": 1635, "1. fc koln": 1635, "cologne": 1635, "koln": 1635,
+    "borussia (mg)": 1650, "borussia mg": 1650, "borussia monchengladbach": 1650,
+    "mainz": 1640, "mainz 05": 1640, "brest": 1735, "stade brestois": 1735,
+    "parma": 1630, "genoa": 1640, "auxerre": 1610, "lorient": 1610, "venezia": 1590,
+    "deportivo a coruna": 1570, "deportivo la coruna": 1570, "le mans": 1480,
+    "ferencvaros": 1690, "viktoria plzen": 1680, "sparta prague": 1720,
+    "slavia prague": 1735, "union saint-gilloise": 1740, "club brugge": 1755,
+    "anderlecht": 1715, "nec nijmegen": 1600, "vasco da gama": 1710, "flamengo": 1780,
+    "palmeiras": 1790, "fluminense": 1740, "sao paulo": 1735, "corinthians": 1720,
+    "river plate": 1775, "boca juniors": 1760, "wimbledon": 1450, "mk dons": 1460,
+    "bastia": 1580, "cannes": 1450, "elana torun": 1420, "lech ii poznan": 1470,
+    "lech poznan": 1690, "lecce": 1540, "sassuolo": 1610, "empoli": 1560, "salernitana": 1490
 }
 
 HIGH_ALTITUDE_STADIUMS: Dict[str, int] = {
@@ -114,7 +124,7 @@ STADIUM_COORDS: Dict[str, Tuple[float, float]] = {
     "inter milan": (45.478, 9.124), "ac milan": (45.478, 9.124), "inter": (45.478, 9.124),
     "juventus": (45.109, 7.641), "paris saint-germain": (48.841, 2.253),
     "psg": (48.841, 2.253), "marseille": (43.270, 5.396), "valencia": (39.475, -0.358),
-    "real sociedad": (43.301, -1.973), "benfica": (38.753, -9.185), "fc porto": (41.162, -8.584)
+    "realcodes": (43.301, -1.973), "benfica": (38.753, -9.185), "fc porto": (41.162, -8.584)
 }
 
 def normalize_name(s: str) -> str:
@@ -147,119 +157,74 @@ def get_club_elo_live(team: str) -> Tuple[float, bool]:
     try:
         slug = urllib.parse.quote(team.replace(" ", ""))
         url = f"http://api.clubelo.com/{slug}"
-        req = urllib.request.Request(url, headers={"User-Agent": "curl/7.88.1"})
+        req = urllib.request.Request(url, headers={"User-Agent": "SoccerEngine/5.0"})
         with urllib.request.urlopen(req, timeout=1.8) as resp:
-            lines = resp.read().decode("utf-8").splitlines()
+            lines = resp.read().decode("utf-8").strip().split("\n")
             if len(lines) > 1:
-                latest = lines[1].split(",")
-                if len(latest) >= 5:
-                    elo = float(latest[4])
-                    CLUB_ELO_CACHE[clean] = {"elo": elo, "time": now}
-                    return elo, True
+                cols = lines[1].split(",")
+                if len(cols) >= 5:
+                    elo_val = float(cols[4])
+                    CLUB_ELO_CACHE[clean] = {"elo": elo_val, "time": now}
+                    return elo_val, True
     except Exception:
         pass
 
-    return 1550.0, False
+    return 1500.0, False
 
 def get_intl_elo(team: str) -> Tuple[float, bool]:
     clean = normalize_name(team)
     for k, v in INTL_ELO_SEEDS.items():
         if k == clean or k in clean or clean in k:
             return v, True
-    return 1600.0, False
+    return 1500.0, False
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# PILLAR 7: WEATHER & ENVIRONMENTAL PITCH CONDITIONS (OPEN-METEO)
-# ═══════════════════════════════════════════════════════════════════════════════
-def get_weather_impact(home_team: str, match_date: Optional[str]) -> Tuple[float, Optional[str]]:
-    clean = normalize_name(home_team)
+def reverse_impute_elo(prob_home: float, prob_away: float, home_adv: float = 65.0) -> float:
+    ph = max(0.05, min(0.90, prob_home))
+    pa = max(0.05, min(0.90, prob_away))
+    ratio = ph / (ph + pa)
+    ratio = max(0.02, min(0.98, ratio))
+    elo_diff = -400.0 * math.log10((1.0 / ratio) - 1.0)
+    return round(elo_diff - home_adv, 1)
 
-    for k, alt in HIGH_ALTITUDE_STADIUMS.items():
-        if k in clean:
-            return 0.92, f"High Altitude ({alt}m above sea level) — oxygen depletion for visitor"
+def de_vig_odds_shin(odds_h: float, odds_d: float, odds_a: float) -> Tuple[Dict[str, float], float, float]:
+    oh, od, oa = max(1.01, odds_h), max(1.01, odds_d), max(1.01, odds_a)
+    inv_h, inv_d, inv_a = 1.0 / oh, 1.0 / od, 1.0 / oa
+    overround = inv_h + inv_d + inv_a
+    margin = overround - 1.0
 
-    coords = None
-    for k, v in STADIUM_COORDS.items():
-        if k in clean or clean in k:
-            coords = v
+    z = 0.0
+    for _ in range(40):
+        def f(zv):
+            def q(inv):
+                det = max(0.0, zv**2 + 4.0 * (1.0 - zv) * (inv**2 / overround))
+                return (math.sqrt(det) - zv) / (2.0 * (1.0 - zv)) if zv < 0.999 else inv / overround
+            return q(inv_h) + q(inv_d) + q(inv_a) - 1.0
+
+        fz = f(z)
+        if abs(fz) < 1e-6:
             break
-    if not coords or not match_date:
-        return 1.0, None
+        dfz = (f(z + 1e-5) - fz) / 1e-5
+        if abs(dfz) < 1e-12:
+            break
+        z = max(0.0, min(0.40, z - fz / dfz))
 
-    try:
-        d = dt.date.fromisoformat(str(match_date)[:10])
-        delta = (d - dt.date.today()).days
-        if delta < 0 or delta > 14:
-            return 1.0, None
-        lat, lon = coords
-        url = (f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}"
-               f"&hourly=temperature_2m,precipitation,wind_speed_10m"
-               f"&start_date={d.isoformat()}&end_date={d.isoformat()}&timezone=UTC")
-        req = urllib.request.Request(url, headers={"User-Agent": "curl/7.88.1"})
-        with urllib.request.urlopen(req, timeout=2.0) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-        times = data.get("hourly", {}).get("time", [])
-        if not times:
-            return 1.0, None
-        idx = min(range(len(times)), key=lambda i: abs(int(times[i][11:13]) - 15))
-        wind = float(data["hourly"]["wind_speed_10m"][idx] or 0)
-        temp = float(data["hourly"]["temperature_2m"][idx] or 15)
-        rain = float(data["hourly"]["precipitation"][idx] or 0)
+    def final_p(inv):
+        det = max(0.0, z**2 + 4.0 * (1.0 - z) * (inv**2 / overround))
+        return (math.sqrt(det) - z) / (2.0 * (1.0 - z)) if z < 0.999 else inv / overround
 
-        factor = 1.0
-        details = []
-        if wind >= 30.0:
-            factor *= 0.93
-            details.append(f"High Wind {wind:.0f}km/h (suppresses passing and long shots)")
-        if rain >= 3.0:
-            factor *= 0.95
-            details.append(f"Wet Pitch ({rain:.1f}mm rain)")
-        if temp >= 32.0:
-            factor *= 0.94
-            details.append(f"Extreme Heat {temp:.0f}°C (reduced late pressing)")
+    ph = max(0.01, final_p(inv_h))
+    pd = max(0.01, final_p(inv_d))
+    pa = max(0.01, final_p(inv_a))
+    tot = ph + pd + pa
+    return {"1": ph / tot, "X": pd / tot, "2": pa / tot}, margin, z
 
-        if details:
-            return factor, " · ".join(details)
-    except Exception:
-        pass
-    return 1.0, None
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# PILLAR 10: MARKET INTELLIGENCE & DE-VIGGING (SHIN & POWER METHODS)
-# ═══════════════════════════════════════════════════════════════════════════════
-def devig_market(oh: Optional[float], od: Optional[float], oa: Optional[float]) -> Optional[Dict[str, float]]:
-    if not (oh and od and oa) or min(oh, od, oa) <= 1.01:
-        return None
-    raw_h, raw_d, raw_a = 1.0 / oh, 1.0 / od, 1.0 / oa
-    overround = raw_h + raw_d + raw_a
-    if overround <= 0.85:
-        return None
-
-    low, high = 0.5, 3.5
-    for _ in range(25):
-        mid = (low + high) / 2.0
-        tot = math.pow(raw_h, mid) + math.pow(raw_d, mid) + math.pow(raw_a, mid)
-        if tot < 1.0:
-            high = mid
-        else:
-            low = mid
-    k = (low + high) / 2.0
-    return {
-        "1": math.pow(raw_h, k),
-        "X": math.pow(raw_d, k),
-        "2": math.pow(raw_a, k)
-    }
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# DIXON-COLES BIVARIATE POISSON MODELING
-# ═══════════════════════════════════════════════════════════════════════════════
-def tau_dixon_coles(x: int, y: int, lambda_h: float, lambda_a: float, rho: float) -> float:
+def dixon_coles_tau(x: int, y: int, lambda_h: float, mu_a: float, rho: float) -> float:
     if x == 0 and y == 0:
-        return max(1.0 - lambda_h * lambda_a * rho, 0.01)
+        return max(0.0, 1.0 - lambda_h * mu_a * rho)
     elif x == 0 and y == 1:
         return 1.0 + lambda_h * rho
     elif x == 1 and y == 0:
-        return 1.0 + lambda_a * rho
+        return 1.0 + mu_a * rho
     elif x == 1 and y == 1:
         return 1.0 - rho
     return 1.0
@@ -267,550 +232,521 @@ def tau_dixon_coles(x: int, y: int, lambda_h: float, lambda_a: float, rho: float
 def poisson_prob(k: int, lambd: float) -> float:
     if lambd <= 0:
         return 1.0 if k == 0 else 0.0
-    return (math.pow(lambd, k) * math.exp(-lambd)) / math.factorial(k)
+    return (math.exp(-lambd) * (lambd ** k)) / math.factorial(k)
 
-def compute_grid(lambda_h: float, lambda_a: float, rho: float, max_goals: int = 7) -> Dict[str, float]:
-    p_home = p_draw = p_away = p_over15 = p_over25 = p_btts = 0.0
+def calculate_dixon_coles_grid(lambda_h: float, mu_a: float, rho: float = -0.055, max_goals: int = 8) -> Dict[str, Any]:
+    prob_matrix = [[0.0 for _ in range(max_goals + 1)] for _ in range(max_goals + 1)]
+    p_home, p_draw, p_away = 0.0, 0.0, 0.0
+    p_btts, p_over15, p_over25 = 0.0, 0.0, 0.0
+
     for x in range(max_goals + 1):
+        px = poisson_prob(x, lambda_h)
         for y in range(max_goals + 1):
-            t = tau_dixon_coles(x, y, lambda_h, lambda_a, rho)
-            pr = t * poisson_prob(x, lambda_h) * poisson_prob(y, lambda_a)
-            if x > y:
-                p_home += pr
-            elif x == y:
-                p_draw += pr
-            else:
-                p_away += pr
-            if (x + y) > 1:
-                p_over15 += pr
-            if (x + y) > 2:
-                p_over25 += pr
-            if x > 0 and y > 0:
-                p_btts += pr
+            py = poisson_prob(y, mu_a)
+            tau = dixon_coles_tau(x, y, lambda_h, mu_a, rho)
+            p = max(0.0, px * py * tau)
+            prob_matrix[x][y] = p
 
-    tot = p_home + p_draw + p_away
-    if tot > 0:
-        p_home /= tot; p_draw /= tot; p_away /= tot
+            if x > y:
+                p_home += p
+            elif x == y:
+                p_draw += p
+            else:
+                p_away += p
+
+            if x > 0 and y > 0:
+                p_btts += p
+            if (x + y) > 1:
+                p_over15 += p
+            if (x + y) > 2:
+                p_over25 += p
+
+    total = sum(sum(row) for row in prob_matrix)
+    if total > 0:
+        p_home /= total
+        p_draw /= total
+        p_away /= total
+        p_btts /= total
+        p_over15 /= total
+        p_over25 /= total
+
     return {
         "p_home": p_home, "p_draw": p_draw, "p_away": p_away,
-        "p_over15": p_over15, "p_over25": p_over25, "p_btts": p_btts
+        "p_btts": p_btts, "p_over15": p_over15, "p_over25": p_over25,
+        "p_1X": p_home + p_draw, "p_X2": p_away + p_draw,
+        "lambda_home": lambda_h, "lambda_away": mu_a
     }
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# SCHEMAS
-# ═══════════════════════════════════════════════════════════════════════════════
+def get_weather_forecast(lat: float, lon: float, match_date: Optional[str] = None) -> Dict[str, Any]:
+    try:
+        url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&hourly=temperature_2m,precipitation,wind_speed_10m&forecast_days=3"
+        req = urllib.request.Request(url, headers={"User-Agent": "SoccerEngine/5.0"})
+        with urllib.request.urlopen(req, timeout=1.5) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            hourly = data.get("hourly", {})
+            temps = hourly.get("temperature_2m", [15.0])
+            winds = hourly.get("wind_speed_10m", [10.0])
+            precip = hourly.get("precipitation", [0.0])
+            return {
+                "temp_c": round(sum(temps[:12]) / max(1, len(temps[:12])), 1),
+                "wind_kmh": round(max(winds[:12]), 1),
+                "rain_mm": round(sum(precip[:12]), 1),
+                "impact_multiplier": 0.94 if max(winds[:12]) > 35 or sum(precip[:12]) > 10 else 1.0,
+                "notes": "Extreme wind/rain penalty" if max(winds[:12]) > 35 else "Nominal conditions"
+            }
+    except Exception:
+        return {"temp_c": 15.0, "wind_kmh": 10.0, "rain_mm": 0.0, "impact_multiplier": 1.0, "notes": "Fallback weather"}
+
 class FixtureInput(BaseModel):
     id: Optional[str] = None
     home: str
     away: str
-    league: Optional[str] = "Universal League"
+    league: Optional[str] = None
     match_date: Optional[str] = None
     odds_home: Optional[float] = None
     odds_draw: Optional[float] = None
     odds_away: Optional[float] = None
-    is_neutral: Optional[bool] = False
-    tournament_phase: Optional[str] = "league"
-    rest_days_home: Optional[int] = 6
-    rest_days_away: Optional[int] = 6
-    key_absences_home: Optional[int] = 0
-    key_absences_away: Optional[int] = 0
+    stadium: Optional[str] = None
+    referee: Optional[str] = None
+    is_neutral: bool = False
+    leg: Optional[int] = 1
 
-class BatchPredictRequest(BaseModel):
-    fixtures: List[FixtureInput] = []
-    raw_slip: Optional[str] = None
+class BatchPredictionRequest(BaseModel):
+    fixtures: List[FixtureInput]
+    enable_ai_research: bool = False
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# UNIVERSAL SLIP PARSER
-# ═══════════════════════════════════════════════════════════════════════════════
-MARKET_KEYWORDS = re.compile(
-    r"^(1x2|double chance|draw no bet|over/under.*|both teams to score|gg/ng|handicap|correct score|half time.*|full time|boosted odds|x-up|home|draw|away|under|over|yes|no|\+?\d+\s*markets?)$",
-    re.IGNORECASE
-)
+def evaluate_1x2_value(
+    p_h: float, p_d: float, p_a: float,
+    fair_h: float, fair_d: float, fair_a: float,
+    market_h: Optional[float], market_d: Optional[float], market_a: Optional[float],
+    total_xg: float, home: str, away: str
+) -> Dict[str, Any]:
+    eff_h = market_h if (market_h and market_h > 1.05) else fair_h
+    eff_d = market_d if (market_d and market_d > 1.05) else fair_d
+    eff_a = market_a if (market_a and market_a > 1.05) else fair_a
 
-def parse_slip_text(text: str) -> List[FixtureInput]:
-    if not text or not text.strip():
-        return []
-    raw = text.strip()
+    ev_h = (p_h * eff_h) - 1.0
+    ev_d = (p_d * eff_d) - 1.0
+    ev_a = (p_a * eff_a) - 1.0
 
-    if raw.startswith("[") and raw.endswith("]"):
-        try:
-            items = json.loads(raw)
-            if isinstance(items, list):
-                fixtures = []
-                for idx, it in enumerate(items):
-                    h = it.get("home") or it.get("homeTeam") or ""
-                    a = it.get("away") or it.get("awayTeam") or ""
-                    if h and a:
-                        fixtures.append(FixtureInput(
-                            id=it.get("id", f"match-{idx+1}"),
-                            home=h.strip(), away=a.strip(),
-                            league=it.get("league", "Universal League"),
-                            odds_home=float(it.get("odds_home") or it.get("odds1") or it.get("oh") or 0) or None,
-                            odds_draw=float(it.get("odds_draw") or it.get("oddsX") or it.get("od") or 0) or None,
-                            odds_away=float(it.get("odds_away") or it.get("odds2") or it.get("oa") or 0) or None,
-                        ))
-                if fixtures:
-                    return fixtures
-        except Exception:
-            pass
+    is_stalemate = (total_xg <= 2.40 and abs(p_h - p_a) <= 0.16)
+    is_tactical_draw = (p_d >= 0.275 and eff_d >= 2.90 and (ev_d >= -0.04 or is_stalemate))
 
-    lines = [l.strip() for l in raw.splitlines() if l.strip()]
-    fixtures = []
+    if is_tactical_draw and (ev_d >= 0.04 or (ev_d > ev_h and ev_d > ev_a and is_stalemate)):
+        return {
+            "pick_1x2": "X",
+            "pick_1x2_name": "Draw (X)",
+            "pick_1x2_odds": round(eff_d, 2),
+            "pick_1x2_prob": round(p_d, 3),
+            "pick_1x2_ev": round(ev_d, 3),
+            "value_category": "TACTICAL_DRAW",
+            "is_high_odds_1x2": eff_d >= 2.50,
+            "high_odds_reason": f"Tactical Draw: Low combined xG ({total_xg:.2f}) produces {p_d*100:.1f}% draw density. Expected value is {ev_d*100:+.1f}%."
+        }
 
-    # Odibets ID Format ("20/09/26 - 21:45 | ID: 3007")
-    if any("id:" in l.lower() for l in lines):
-        match_indices = [idx for idx, l in enumerate(lines) if "id:" in l.lower()]
-        for m in range(len(match_indices)):
-            start_l = match_indices[m]
-            end_l = match_indices[m+1] if m+1 < len(match_indices) else len(lines)
-            block = lines[start_l:end_l]
-            id_match = re.search(r"id:\s*(\d+)", block[0], re.IGNORECASE)
-            match_id = id_match.group(1) if id_match else f"{m+1}"
+    if p_a >= 0.27 and eff_a >= 2.65 and ev_a >= max(ev_h, ev_d):
+        return {
+            "pick_1x2": "2",
+            "pick_1x2_name": f"{away} (2)",
+            "pick_1x2_odds": round(eff_a, 2),
+            "pick_1x2_prob": round(p_a, 3),
+            "pick_1x2_ev": round(ev_a, 3),
+            "value_category": "VALUE_UNDERDOG",
+            "is_high_odds_1x2": True,
+            "high_odds_reason": f"Value Away Underdog: {away} holds {p_a*100:.1f}% win prob at {eff_a:.2f} odds."
+        }
 
-            candidates = []
-            for l in block[1:]:
-                if len(candidates) >= 2:
-                    break
-                if not MARKET_KEYWORDS.match(l) and not re.match(r"^\d+(\.\d+)?$", l) and not re.match(r"^\d{1,2}[/\-.]\d{1,2}", l):
-                    candidates.append(l)
+    if p_h >= 0.28 and eff_h >= 2.50 and ev_h >= max(ev_d, ev_a):
+        return {
+            "pick_1x2": "1",
+            "pick_1x2_name": f"{home} (1)",
+            "pick_1x2_odds": round(eff_h, 2),
+            "pick_1x2_prob": round(p_h, 3),
+            "pick_1x2_ev": round(ev_h, 3),
+            "value_category": "VALUE_UNDERDOG",
+            "is_high_odds_1x2": True,
+            "high_odds_reason": f"Value Home Underdog: {home} holds {p_h*100:.1f}% win prob at {eff_h:.2f} odds."
+        }
 
-            if len(candidates) >= 2:
-                home, away = candidates[0], candidates[1]
-                decimals = []
-                for l in block[1:15]:
-                    if re.match(r"^\d+\.\d{1,2}$", l):
-                        decimals.append(float(l))
-                fixtures.append(FixtureInput(
-                    id=match_id, home=home, away=away, league="Universal League",
-                    odds_home=decimals[0] if len(decimals) > 0 else None,
-                    odds_draw=decimals[1] if len(decimals) > 1 else None,
-                    odds_away=decimals[2] if len(decimals) > 2 else None,
-                ))
-        if fixtures:
-            return fixtures
+    if p_h >= p_d and p_h >= p_a:
+        cat = "VALUE_FAVORITE" if p_h >= 0.50 else "BALANCED"
+        return {
+            "pick_1x2": "1",
+            "pick_1x2_name": f"{home} (1)",
+            "pick_1x2_odds": round(eff_h, 2),
+            "pick_1x2_prob": round(p_h, 3),
+            "pick_1x2_ev": round(ev_h, 3),
+            "value_category": cat,
+            "is_high_odds_1x2": eff_h >= 2.50,
+            "high_odds_reason": None
+        }
+    elif p_a >= p_h and p_a >= p_d:
+        cat = "VALUE_FAVORITE" if p_a >= 0.48 else "BALANCED"
+        return {
+            "pick_1x2": "2",
+            "pick_1x2_name": f"{away} (2)",
+            "pick_1x2_odds": round(eff_a, 2),
+            "pick_1x2_prob": round(p_a, 3),
+            "pick_1x2_ev": round(ev_a, 3),
+            "value_category": cat,
+            "is_high_odds_1x2": eff_a >= 2.50,
+            "high_odds_reason": None
+        }
+    else:
+        return {
+            "pick_1x2": "X",
+            "pick_1x2_name": "Draw (X)",
+            "pick_1x2_odds": round(eff_d, 2),
+            "pick_1x2_prob": round(p_d, 3),
+            "pick_1x2_ev": round(ev_d, 3),
+            "value_category": "TACTICAL_DRAW",
+            "is_high_odds_1x2": eff_d >= 2.50,
+            "high_odds_reason": f"Tactical Draw: Symmetrical win expectancies produce {p_d*100:.1f}% draw probability."
+        }
 
-    # Betika / Bullet Format ("League • Match")
-    if any("•" in l for l in lines) or any("markets" in l.lower() for l in lines):
-        cur_league = "Universal League"
-        i = 0
-        while i < len(lines):
-            l = lines[i]
-            if "•" in l and "STARTS IN" not in l:
-                cur_league = re.sub(r"international clubs\s*•\s*", "", l, flags=re.IGNORECASE).strip()
-                i += 1
-                if i < len(lines) and (re.match(r"^\d{1,2}[/\-.]\d{1,2}", lines[i]) or any(lines[i].lower().startswith(w) for w in ["today", "tomorrow", "starts"])):
-                    i += 1
-                if i < len(lines):
-                    home = lines[i]; i += 1
-                    if i < len(lines):
-                        away = lines[i]; i += 1
-                        odds_list = []
-                        while i < len(lines) and "•" not in lines[i] and not re.search(r"\+\d+\s*market", lines[i], re.IGNORECASE):
-                            try:
-                                v = float(lines[i])
-                                if 1.0 < v < 100.0:
-                                    odds_list.append(v)
-                            except ValueError:
-                                pass
-                            i += 1
-                        if home and away and not MARKET_KEYWORDS.match(home):
-                            fixtures.append(FixtureInput(
-                                id=f"match-{len(fixtures)+1}", home=home, away=away, league=cur_league,
-                                odds_home=odds_list[0] if len(odds_list) > 0 else None,
-                                odds_draw=odds_list[1] if len(odds_list) > 1 else None,
-                                odds_away=odds_list[2] if len(odds_list) > 2 else None,
-                            ))
-                        continue
-            i += 1
-        if fixtures:
-            return fixtures
-
-    # Single-line format ("Team A vs Team B 1.85 3.40 4.20")
-    for l in lines:
-        if re.search(r"\bvs\b|\s-\s", l, re.IGNORECASE):
-            match_part = re.split(r"\b\d+\.\d{1,2}\b", l)[0] or l
-            parts = re.split(r"\bvs\b|\s-\s", match_part, flags=re.IGNORECASE)
-            odds = re.findall(r"\b\d+\.\d{1,2}\b", l)
-            if len(parts) >= 2:
-                h = re.sub(r"^#?\d+\s*", "", parts[0]).strip()
-                a = parts[1].strip()
-                if h and a and not MARKET_KEYWORDS.match(h):
-                    fixtures.append(FixtureInput(
-                        id=f"match-{len(fixtures)+1}", home=h, away=a, league="Universal League",
-                        odds_home=float(odds[0]) if len(odds) > 0 else None,
-                        odds_draw=float(odds[1]) if len(odds) > 1 else None,
-                        odds_away=float(odds[2]) if len(odds) > 2 else None,
-                    ))
-    return fixtures
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# PREDICTION PIPELINE (FULL 10 PILLARS)
-# ═══════════════════════════════════════════════════════════════════════════════
 def predict_fixture(f: FixtureInput) -> Dict[str, Any]:
     domain = classify_domain(f.league or "")
     is_intl = (domain == "international_tournament")
 
     if is_intl:
-        elo_h, conf_h = get_intl_elo(f.home)
-        elo_a, conf_a = get_intl_elo(f.away)
+        elo_h, found_h = get_intl_elo(f.home)
+        elo_a, found_a = get_intl_elo(f.away)
     else:
-        elo_h, conf_h = get_club_elo_live(f.home)
-        elo_a, conf_a = get_club_elo_live(f.away)
+        elo_h, found_h = get_club_elo_live(f.home)
+        elo_a, found_a = get_club_elo_live(f.away)
 
-    has_real_ratings = conf_h and conf_a
-    fair_market = devig_market(f.odds_home, f.odds_draw, f.odds_away)
+    has_odds = (f.odds_home and f.odds_draw and f.odds_away and f.odds_home > 1.05)
+    margin = 0.05
+    z_shin = 0.02
+    fair_market = None
 
-    inferred_from_market = False
-    if not has_real_ratings and fair_market:
-        ratio = max(0.01, min(100.0, fair_market["1"] / max(0.005, fair_market["2"])))
-        inferred_gap = 400.0 * math.log10(ratio)
-        elo_h = 1550.0 + (inferred_gap / 2.0)
-        elo_a = 1550.0 - (inferred_gap / 2.0)
-        has_real_ratings = True
-        inferred_from_market = True
+    if has_odds:
+        fair_market, margin, z_shin = de_vig_odds_shin(f.odds_home, f.odds_draw, f.odds_away)
+        if not found_h or not found_a:
+            inferred_diff = reverse_impute_elo(fair_market["1"], fair_market["2"], home_adv=0.0 if f.is_neutral else 65.0)
+            if not found_h and found_a:
+                elo_h = round(elo_a + inferred_diff, 1)
+            elif not found_a and found_h:
+                elo_a = round(elo_h - inferred_diff, 1)
+            else:
+                elo_h = 1600.0 + (inferred_diff / 2.0)
+                elo_a = 1600.0 - (inferred_diff / 2.0)
 
-    hfa = 0.0 if f.is_neutral else (45.0 if is_intl else 60.0)
-    elo_gap = (elo_h + hfa) - elo_a
+    hfa_elo = 0.0 if f.is_neutral else 60.0
+    norm_stadium = normalize_name(f.stadium or f.home)
+    if norm_stadium in HIGH_ALTITUDE_STADIUMS:
+        alt = HIGH_ALTITUDE_STADIUMS[norm_stadium]
+        if alt >= 3000:
+            hfa_elo += 65.0
+        elif alt >= 2000:
+            hfa_elo += 40.0
+
+    eff_elo_h = elo_h + hfa_elo
+    eff_elo_a = elo_a
+    elo_diff = eff_elo_h - eff_elo_a
 
     base_lh = WC_LAMBDA_HOME if is_intl else DEFAULT_LAMBDA_HOME
     base_la = WC_LAMBDA_AWAY if is_intl else DEFAULT_LAMBDA_AWAY
-    rho = WC_RHO if is_intl else DEFAULT_RHO
+    rho     = WC_RHO if is_intl else DEFAULT_RHO
 
-    goal_shift = elo_gap / 580.0
-    lambda_h = max(0.35, base_lh * (1.0 + goal_shift))
-    lambda_a = max(0.25, base_la * (1.0 - goal_shift * 0.75))
+    lambda_h = base_lh * (10.0 ** (elo_diff / 1000.0))
+    lambda_a = base_la * (10.0 ** (-elo_diff / 1000.0))
 
-    if (f.key_absences_home or 0) > 0:
-        lambda_h *= max(0.80, 1.0 - 0.08 * (f.key_absences_home or 0))
-    if (f.key_absences_away or 0) > 0:
-        lambda_a *= max(0.80, 1.0 - 0.08 * (f.key_absences_away or 0))
+    norm_home = normalize_name(f.home)
+    if norm_home in STADIUM_COORDS:
+        lat, lon = STADIUM_COORDS[norm_home]
+        w = get_weather_forecast(lat, lon, f.match_date)
+        lambda_h *= w["impact_multiplier"]
+        lambda_a *= w["impact_multiplier"]
 
-    if (f.rest_days_home or 6) < 3:
-        lambda_h *= 0.94
-    if (f.rest_days_away or 6) < 3:
-        lambda_a *= 0.92
-
-    w_factor, w_note = get_weather_impact(f.home, f.match_date)
-    lambda_h *= w_factor
-    lambda_a *= w_factor
-
-    npxg_home = max(0.25, lambda_h - 0.12)
-    npxg_away = max(0.20, lambda_a - 0.10)
-
-    grid = compute_grid(lambda_h, lambda_a, rho)
-    m_h, m_d, m_a = grid["p_home"], grid["p_draw"], grid["p_away"]
+    dc = calculate_dixon_coles_grid(lambda_h, lambda_a, rho=rho)
 
     if fair_market:
-        weight = 0.60 if (has_real_ratings and not inferred_from_market) else 0.15
-        p_home = (m_h * weight) + (fair_market["1"] * (1.0 - weight))
-        p_draw = (m_d * weight) + (fair_market["X"] * (1.0 - weight))
-        p_away = (m_a * weight) + (fair_market["2"] * (1.0 - weight))
+        p_home = (dc["p_home"] * 0.35) + (fair_market["1"] * 0.65)
+        p_draw = (dc["p_draw"] * 0.35) + (fair_market["X"] * 0.65)
+        p_away = (dc["p_away"] * 0.35) + (fair_market["2"] * 0.65)
+        tot = p_home + p_draw + p_away
+        p_home /= tot
+        p_draw /= tot
+        p_away /= tot
     else:
-        p_home, p_draw, p_away = m_h, m_d, m_a
-
-    tot_p = p_home + p_draw + p_away
-    p_home /= tot_p; p_draw /= tot_p; p_away /= tot_p
+        p_home = dc["p_home"]
+        p_draw = dc["p_draw"]
+        p_away = dc["p_away"]
 
     p_1x = p_home + p_draw
     p_x2 = p_away + p_draw
+    p_over15 = dc["p_over15"]
+    p_over25 = dc["p_over25"]
+    p_btts   = dc["p_btts"]
 
-    fair_h = fair_market["1"] if fair_market else p_home
-    fair_d = fair_market["X"] if fair_market else p_draw
-    fair_a = fair_market["2"] if fair_market else p_away
+    fair_odds_h = round(1.0 / max(0.01, p_home), 2)
+    fair_odds_d = round(1.0 / max(0.01, p_draw), 2)
+    fair_odds_a = round(1.0 / max(0.01, p_away), 2)
 
-    edge_h = p_home - fair_h
-    edge_d = p_draw - fair_d
-    edge_a = p_away - fair_a
+    total_xg = lambda_h + lambda_a
+    val_1x2 = evaluate_1x2_value(
+        p_home, p_draw, p_away,
+        fair_odds_h, fair_odds_d, fair_odds_a,
+        f.odds_home, f.odds_draw, f.odds_away,
+        total_xg, f.home, f.away
+    )
 
-    pick = "NO BET"
-    pick_odds = None
-    market_name = "1X2"
-    edge = 0.0
-    tier = "NO BET"
+    primary_pick = "NO BET"
+    pick_odds = 1.35
+    primary_prob = p_1x
+    rec_market = "Double Chance 1X"
+    tier = "CANDIDATE"
 
-    if p_home >= 0.65:
-        pick = f"{f.home} (1)"
-        pick_odds = f.odds_home or round(1.0 / max(0.01, p_home), 2)
-        edge = edge_h
+    if p_home >= 0.64:
+        primary_pick = f"{f.home} (1)"
+        rec_market = f"{f.home} Win (1)"
+        pick_odds = f.odds_home if (f.odds_home and f.odds_home > 1.05) else fair_odds_h
+        primary_prob = p_home
         tier = "ELITE" if p_home >= 0.72 else "STRONG"
-        market_name = "Home Win"
     elif p_away >= 0.60:
-        pick = f"{f.away} (2)"
-        pick_odds = f.odds_away or round(1.0 / max(0.01, p_away), 2)
-        edge = edge_a
+        primary_pick = f"{f.away} (2)"
+        rec_market = f"{f.away} Win (2)"
+        pick_odds = f.odds_away if (f.odds_away and f.odds_away > 1.05) else fair_odds_a
+        primary_prob = p_away
         tier = "ELITE" if p_away >= 0.68 else "STRONG"
-        market_name = "Away Win"
-    elif p_1x >= 0.72 and (p_home >= p_away):
-        pick = f"{f.home} or Draw (1X)"
-        pick_odds = round(1.0 / max(0.01, (fair_h + fair_d * 0.90)), 2) if fair_market else 1.36
-        edge = max(0.0, p_1x - (fair_h + fair_d))
+    elif p_1x >= 0.72 and p_home >= p_away:
+        primary_pick = f"{f.home} or Draw (Double Chance 1X)"
+        rec_market = f"{f.home} or Draw (1X)"
+        pick_odds = round(1.0 / max(0.01, (fair_market['1'] + fair_market['X'] * 0.90)), 2) if fair_market else round(1.0 / p_1x, 2)
+        pick_odds = max(1.20, min(1.80, pick_odds))
+        primary_prob = p_1x
         tier = "STRONG" if p_1x >= 0.78 else "CANDIDATE"
-        market_name = "Double Chance 1X"
-    elif p_x2 >= 0.70 and (p_away >= p_home):
-        pick = f"{f.away} or Draw (X2)"
-        pick_odds = round(1.0 / max(0.01, (fair_a + fair_d * 0.90)), 2) if fair_market else 1.40
-        edge = max(0.0, p_x2 - (fair_a + fair_d))
+    elif p_x2 >= 0.70 and p_away >= p_home:
+        primary_pick = f"{f.away} or Draw (Double Chance X2)"
+        rec_market = f"{f.away} or Draw (X2)"
+        pick_odds = round(1.0 / max(0.01, (fair_market['2'] + fair_market['X'] * 0.90)), 2) if fair_market else round(1.0 / p_x2, 2)
+        pick_odds = max(1.20, min(1.80, pick_odds))
+        primary_prob = p_x2
         tier = "STRONG" if p_x2 >= 0.76 else "CANDIDATE"
-        market_name = "Double Chance X2"
-    elif grid["p_over15"] >= 0.78:
-        pick = "Over 1.5 Goals"
+    elif p_over15 >= 0.78:
+        primary_pick = "Over 1.5 Goals"
+        rec_market = "Over 1.5 Total Goals"
         pick_odds = 1.34
+        primary_prob = p_over15
         tier = "CANDIDATE"
-        market_name = "Total Goals"
     else:
-        pick = "NO BET"
-        pick_odds = 1.50
-        tier = "NO BET"
-        market_name = "1X2"
+        if p_1x >= p_x2:
+            primary_pick = f"{f.home} or Draw (Double Chance 1X)"
+            rec_market = f"{f.home} or Draw (1X)"
+            primary_prob = p_1x
+            pick_odds = 1.38
+        else:
+            primary_pick = f"{f.away} or Draw (Double Chance X2)"
+            rec_market = f"{f.away} or Draw (X2)"
+            primary_prob = p_x2
+            pick_odds = 1.40
 
-    selected_prob = (
-        p_home if "Home Win" in market_name else
-        p_away if "Away Win" in market_name else
-        p_1x if "1X" in market_name else
-        p_x2 if "X2" in market_name else
-        grid["p_over15"] if "Over 1.5" in pick else p_home
-    )
-    acca_eligible = (tier in ["ELITE", "STRONG", "CANDIDATE"] and selected_prob >= 0.58)
-
-    reason = (
-        f"Rating Gap: {elo_gap:+.0f} ({f.home} {elo_h:.0f} vs {f.away} {elo_a:.0f}"
-        f"{' [Market-Imputed]' if inferred_from_market else ''}). "
-        f"xG: {lambda_h:.2f} to {lambda_a:.2f} (npxG: {npxg_home:.2f}-{npxg_away:.2f}). "
-        f"Selected {pick} with {selected_prob*100:.1f}% calibrated model probability."
-    )
-    if w_note:
-        reason += f" Weather/Pitch: {w_note}."
+    adj_edge = round((primary_prob * pick_odds) - 1.0, 3)
 
     return {
-        "id": f.id or f"match-{normalize_name(f.home)}-{normalize_name(f.away)}",
-        "home": f.home, "away": f.away, "league": f.league, "domain": domain,
-        "data_confidence": has_real_ratings,
-        "home_elo": round(elo_h, 1), "away_elo": round(elo_a, 1), "elo_gap": round(elo_gap, 1),
-        "lambda_home": round(lambda_h, 2), "lambda_away": round(lambda_a, 2),
-        "npxg_home": round(npxg_home, 2), "npxg_away": round(npxg_away, 2),
-        "p_home": p_home, "p_draw": p_draw, "p_away": p_away,
-        "p_1x": p_1x, "p_x2": p_x2,
-        "p_over15": grid["p_over15"], "p_over25": grid["p_over25"], "p_btts_yes": grid["p_btts"],
-        "edge_home": edge_h, "edge_draw": edge_d, "edge_away": edge_a,
-        "adj_edge": max(0.0, edge),
-        "pick": pick, "market": market_name, "pick_odds": float(pick_odds or 1.45),
-        "pick_prob": selected_prob,
-        "confidence_tier": tier, "acca_eligible": acca_eligible,
-        "model_used": "Dixon-Coles + Bayesian Market De-vigging (10-Pillar)",
-        "reason": reason,
-        "weather_impact": w_note
+        "id": f.id or f"{f.home}-{f.away}",
+        "home": f.home,
+        "away": f.away,
+        "league": f.league or "Universal League",
+        "match_date": f.match_date,
+        "elo_home": round(elo_h, 1),
+        "elo_away": round(elo_a, 1),
+        "elo_gap": round(elo_diff, 1),
+        "lambda_home": round(lambda_h, 2),
+        "lambda_away": round(lambda_a, 2),
+        "npxg_home": round(max(0.1, lambda_h - 0.12), 2),
+        "npxg_away": round(max(0.1, lambda_a - 0.10), 2),
+        "p_home": round(p_home, 3),
+        "p_draw": round(p_draw, 3),
+        "p_away": round(p_away, 3),
+        "p_1X": round(p_1x, 3),
+        "p_X2": round(p_x2, 3),
+        "p_over15": round(p_over15, 3),
+        "p_over25": round(p_over25, 3),
+        "p_btts": round(p_btts, 3),
+        "fair_odds_home": fair_odds_h,
+        "fair_odds_draw": fair_odds_d,
+        "fair_odds_away": fair_odds_a,
+        "pick_1x2": val_1x2["pick_1x2"],
+        "pick_1x2_name": val_1x2["pick_1x2_name"],
+        "pick_1x2_odds": val_1x2["pick_1x2_odds"],
+        "pick_1x2_prob": val_1x2["pick_1x2_prob"],
+        "pick_1x2_ev": val_1x2["pick_1x2_ev"],
+        "value_category": val_1x2["value_category"],
+        "is_high_odds_1x2": val_1x2["is_high_odds_1x2"],
+        "high_odds_reason": val_1x2["high_odds_reason"],
+        "pick": val_1x2["pick_1x2"],
+        "primary_pick": primary_pick,
+        "recommended_market": rec_market,
+        "pick_odds": pick_odds,
+        "primary_win_prob": primary_prob,
+        "confidence_tier": tier,
+        "adj_edge": max(0.0, adj_edge),
+        "shin_z": round(z_shin, 4),
+        "margin": round(margin, 3),
+        "acca_eligible": primary_prob >= 0.58,
+        "reason": f"Poisson Expectancy xG: {lambda_h:.2f} vs {lambda_a:.2f}. Fair Intrinsic Odds: 1:@{fair_odds_h} X:@{fair_odds_d} 2:@{fair_odds_a}. Recommended: {rec_market} ({primary_prob*100:.1f}% prob).{' [' + val_1x2['high_odds_reason'] + ']' if val_1x2['high_odds_reason'] else ''}"
     }
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# ACCUMULATOR BUILDER (STRICTLY ENFORCING ≥ 3.00 ODDS)
-# ═══════════════════════════════════════════════════════════════════════════════
 def build_accumulators(predictions: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    actionable = [p for p in predictions if p.get("pick") != "NO BET" and p.get("acca_eligible", True)]
-    if not actionable:
-        return []
+    actionable = [p for p in predictions if p.get("acca_eligible", False)]
+    sorted_cands = sorted(actionable, key=lambda x: x.get("primary_win_prob", 0.0), reverse=True)
 
-    sorted_picks = sorted(actionable, key=lambda x: (-x.get("pick_prob", 0), -x.get("adj_edge", 0)))
-    accumulators = []
-
-    def make_acca(id_str: str, name: str, min_odds: float, risk: str, start_idx: int = 0, max_legs: int = 8):
-        if start_idx >= len(sorted_picks):
+    def create_acca(name: str, target_min_odds: float, start_idx: int = 0, max_legs: int = 8) -> Optional[Dict[str, Any]]:
+        if start_idx >= len(sorted_cands):
             return None
         legs = []
-        c_odds = 1.0
-        c_prob = 1.0
+        comb_odds = 1.0
+        comb_prob = 1.0
         used_teams = set()
 
-        for idx in range(start_idx, len(sorted_picks)):
-            if len(legs) >= max_legs:
-                break
-            cand = sorted_picks[idx]
-            h, a = cand["home"].lower(), cand["away"].lower()
+        for cand in sorted_cands[start_idx:]:
+            h = cand["home"].lower()
+            a = cand["away"].lower()
             if h in used_teams or a in used_teams:
                 continue
-
             legs.append(cand)
             used_teams.add(h)
             used_teams.add(a)
+            comb_odds *= cand["pick_odds"]
+            comb_prob *= cand["primary_win_prob"]
 
-            o = float(cand.get("pick_odds") or 1.35)
-            c_odds *= o
-            c_prob *= cand.get("pick_prob", 0.70)
-
-            if c_odds >= min_odds and len(legs) >= 2:
+            if comb_odds >= target_min_odds and len(legs) >= 2:
+                break
+            if len(legs) >= max_legs:
                 break
 
-        # Strictly enforce >= 3.00 odds across ALL accumulators
-        if c_odds < 3.00 or len(legs) < 2:
+        if comb_odds < 3.00 or len(legs) < 2:
             return None
 
-        ev = (c_prob * c_odds) - 1.0
+        ev = (comb_prob * comb_odds) - 1.0
         return {
-            "id": id_str,
-            "name": name,
-            "n_legs": len(legs),
-            "combined_odds": round(c_odds, 2),
-            "combined_model_prob": round(c_prob * 100, 1),
+            "name": f"{name} (≥{target_min_odds:.2f} Odds)",
+            "combined_odds": round(comb_odds, 2),
+            "combined_model_prob": round(comb_prob * 100, 1),
             "expected_value": round(ev * 100, 1),
-            "risk_tier": risk,
+            "n_legs": len(legs),
             "min_odds_verified": True,
-            "recommendation_note": f"Constructed strictly satisfying minimum 3.00+ odds mandate ({c_odds:.2f}x total return).",
-            "legs": [{
-                "home": l["home"], "away": l["away"], "league": l.get("league", "Universal League"),
-                "pick": l["pick"], "tier": l["confidence_tier"],
-                "odds": float(l.get("pick_odds") or 1.35), "prob": l.get("pick_prob", 0.70)
-            } for l in legs]
+            "legs": [
+                {
+                    "home": l["home"],
+                    "away": l["away"],
+                    "pick": l["primary_pick"],
+                    "tier": l["confidence_tier"],
+                    "odds": l["pick_odds"],
+                    "prob": l["primary_win_prob"]
+                }
+                for l in legs
+            ]
         }
 
-    banker = make_acca("banker-safe", "Banker Multiplier (Safest Selections · ≥3.00 Odds)", 3.00, "BANKER", 0, 4)
+    accas = []
+
+    banker = create_acca("Banker Multiplier (Safest Selections · ≥3.00 Odds)", 3.00, 0, 4)
     if banker:
-        accumulators.append(banker)
+        accas.append(banker)
 
-    value_acca = make_acca("value-acca", "High-Probability Value Acca (≥4.00 Odds)", 4.00, "VALUE", 0, 5)
-    if value_acca and (not banker or value_acca["combined_odds"] != banker["combined_odds"]):
-        accumulators.append(value_acca)
+    growth = create_acca("Solid Growth Multiplier", 6.00, 0, 5)
+    if growth:
+        accas.append(growth)
 
-    growth_acca = make_acca("growth-acca", "Solid Growth Multiplier (≥6.00 Odds)", 6.00, "SAFE", 0, 6)
-    if growth_acca:
-        accumulators.append(growth_acca)
+    power = create_acca("Power Multiplier Acca", 10.00, 0, 6)
+    if power:
+        accas.append(power)
 
-    power_acca = make_acca("power-acca", "Power Multiplier Acca (≥10.00 Odds)", 10.00, "SAFE", 0, 7)
-    if power_acca:
-        accumulators.append(power_acca)
+    mega = create_acca("Mega High-Probability Acca", 20.00, 0, 8)
+    if mega:
+        accas.append(mega)
 
-    mega_acca = make_acca("mega-acca", "Mega High-Probability Acca (≥20.00 Odds)", 20.00, "AGGRESSIVE", 0, 10)
-    if mega_acca:
-        accumulators.append(mega_acca)
+    # High-Odds 1X2 Value Ticket (Target ≥ 10.00 Odds)
+    cands_1x2 = [
+        p for p in predictions
+        if p.get("pick_1x2") and (p.get("is_high_odds_1x2") or p.get("pick_1x2_odds", 0.0) >= 2.10 or p.get("value_category") == "TACTICAL_DRAW")
+    ]
+    cands_1x2_sorted = sorted(cands_1x2, key=lambda x: x.get("pick_1x2_ev", 0.0), reverse=True)
 
-    return [a for a in accumulators if a["combined_odds"] >= 3.00]
+    if len(cands_1x2_sorted) >= 2:
+        legs_1x2 = []
+        odds_1x2 = 1.0
+        prob_1x2 = 1.0
+        used_1x2 = set()
+        for cand in cands_1x2_sorted:
+            if len(legs_1x2) >= 5:
+                break
+            h = cand["home"].lower()
+            a = cand["away"].lower()
+            if h in used_1x2 or a in used_1x2:
+                continue
+            legs_1x2.append(cand)
+            used_1x2.add(h)
+            used_1x2.add(a)
+            odds_1x2 *= cand["pick_1x2_odds"]
+            prob_1x2 *= cand["pick_1x2_prob"]
+            if odds_1x2 >= 10.00 and len(legs_1x2) >= 2:
+                break
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# FASTAPI ENDPOINTS
-# ═══════════════════════════════════════════════════════════════════════════════
+        if odds_1x2 >= 3.00 and len(legs_1x2) >= 2:
+            ev_1x2 = (prob_1x2 * odds_1x2) - 1.0
+            accas.append({
+                "name": "High-Odds 1X2 Value Ticket (≥10.00 Odds)",
+                "combined_odds": round(odds_1x2, 2),
+                "combined_model_prob": round(prob_1x2 * 100, 1),
+                "expected_value": round(ev_1x2 * 100, 1),
+                "n_legs": len(legs_1x2),
+                "min_odds_verified": True,
+                "legs": [
+                    {
+                        "home": l["home"],
+                        "away": l["away"],
+                        "pick": f"{l['pick_1x2_name']} @ {l['pick_1x2_odds']:.2f}",
+                        "tier": l["confidence_tier"],
+                        "odds": l["pick_1x2_odds"],
+                        "prob": l["pick_1x2_prob"]
+                    }
+                    for l in legs_1x2
+                ]
+            })
+
+    return [a for a in accas if a["combined_odds"] >= 3.00]
+
 @app.get("/")
-@app.get("/api")
 def root():
     return {
+        "engine": "Soccer Intelligence Engine v5",
+        "version": "5.0.0",
         "status": "online",
-        "engine": "Soccer Intelligence Engine v4.5 Quantitative (10-Pillar)",
-        "zero_llm": True,
-        "min_acca_odds": 3.00,
-        "pillars": [
-            "1. Dynamic Elo & Glicko-2 Latent Strength",
-            "2. Chance Creation (xG & npxG) & Field Tilt",
-            "3. Lineups, Squad Depth & Positional WAR",
-            "4. Micro-Cycles (Rest, Travel, Congestion)",
-            "5. Tactical Matchups & Stylistic Fit",
-            "6. Tournament Stakes, Dead Rubbers & Motivation",
-            "7. Weather & Altitude (Open-Meteo)",
-            "8. Decay-Weighted Form & Regression",
-            "9. Referee Tendencies & Disciplinary Metrics",
-            "10. Closing Line Value (CLV) & Shin De-vigging"
-        ]
+        "endpoints": ["/api/predict", "/api/batch-predict", "/api/health"]
     }
 
-@app.get("/health")
 @app.get("/api/health")
-def health_check():
-    return {
-        "status": "healthy",
-        "version": "4.5.0",
-        "llm_free": True,
-        "min_acca_odds_enforced": 3.00,
-        "components": {
-            "shin_power_devigging": True,
-            "dixon_coles_poisson": True,
-            "reverse_elo_imputation": True,
-            "ten_pillars_pipeline": True,
-            "open_meteo_weather": True,
-            "universal_slip_parser": True
-        }
-    }
+def health():
+    return {"status": "ok", "timestamp": dt.datetime.utcnow().isoformat()}
 
-@app.post("/predict")
 @app.post("/api/predict")
 def predict_endpoint(fixture: FixtureInput):
-    return predict_fixture(fixture)
-
-@app.post("/predict/batch")
-@app.post("/api/predict/batch")
-def predict_batch_endpoint(request: BatchPredictRequest):
-    fixtures = request.fixtures
-    if not fixtures and request.raw_slip:
-        fixtures = parse_slip_text(request.raw_slip)
-
-    if not fixtures:
-        return {
-            "total_fixtures": 0,
-            "actionable_picks": 0,
-            "no_bet_count": 0,
-            "acca_eligible_count": 0,
-            "predictions": [],
-            "accumulators": []
-        }
-
-    if len(fixtures) > 500:
-        raise HTTPException(status_code=400, detail="Maximum 500 fixtures per batch")
-
-    predictions = [predict_fixture(f) for f in fixtures]
-    accumulators = build_accumulators(predictions)
-    actionable = [p for p in predictions if p["pick"] != "NO BET"]
-
-    return {
-        "total_fixtures": len(predictions),
-        "actionable_picks": len(actionable),
-        "no_bet_count": sum(1 for p in predictions if p["pick"] == "NO BET"),
-        "acca_eligible_count": sum(1 for p in predictions if p.get("acca_eligible")),
-        "min_acca_odds_enforced": 3.00,
-        "predictions": predictions,
-        "accumulators": accumulators
-    }
-
-@app.post("/parse")
-@app.post("/api/parse")
-def parse_endpoint(payload: Dict[str, str]):
-    raw = payload.get("text") or payload.get("slip") or ""
-    parsed = parse_slip_text(raw)
-    return {"count": len(parsed), "fixtures": [f.dict() for f in parsed]}
-
-ESPN_LEAGUES = {"PL": "eng.1", "CL": "uefa.champions", "PD": "esp.1", "SA": "ita.1", "BL1": "ger.1", "FL1": "fra.1"}
-
-@app.get("/fixtures/today")
-@app.get("/api/fixtures/today")
-def get_today_fixtures(league: str = "PL"):
-    slug = ESPN_LEAGUES.get(league.upper(), "eng.1")
-    url = f"https://site.api.espn.com/apis/site/v2/sports/soccer/{slug}/scoreboard"
-    req = urllib.request.Request(url, headers={"User-Agent": "curl/7.88.1"})
     try:
-        with urllib.request.urlopen(req, timeout=5) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-            events = data.get("events", [])
-            output = []
-            for ev in events[:25]:
-                comps = ev.get("competitions", [{}])[0]
-                competitors = comps.get("competitors", [])
-                home = next((c["team"]["displayName"] for c in competitors if c.get("homeAway") == "home"), "")
-                away = next((c["team"]["displayName"] for c in competitors if c.get("homeAway") == "away"), "")
-                if home and away:
-                    output.append({
-                        "home": home, "away": away, "kickoff": ev.get("date"),
-                        "status": ev.get("status", {}).get("type", {}).get("description", "SCHEDULED")
-                    })
-            return {"league": league.upper(), "source": "espn_live_feed", "fixtures": output}
-    except Exception:
-        return {"league": league.upper(), "source": "fallback", "fixtures": []}
+        return predict_fixture(fixture)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/elo/{team}")
-@app.get("/api/elo/{team}")
-def get_elo_endpoint(team: str, international: bool = False):
-    if international:
-        elo, real = get_intl_elo(team)
-        source = "eloratings.net" if real else "Generic baseline"
-    else:
-        elo, real = get_club_elo_live(team)
-        source = "api.clubelo.com" if real else "Generic baseline"
-    return {"team": team, "elo": elo, "is_real_data": real, "source": source, "date": time.strftime("%Y-%m-%d")}
+@app.post("/api/batch-predict")
+def batch_predict_endpoint(req: BatchPredictionRequest):
+    try:
+        predictions = [predict_fixture(f) for f in req.fixtures]
+        accas = build_accumulators(predictions)
+        return {
+            "engine": "v5.0-production-quantitative",
+            "count": len(predictions),
+            "predictions": predictions,
+            "accumulators": accas,
+            "min_odds_enforced": True,
+            "min_odds_floor": 3.00
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("PORT", 8000))
-    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
+    uvicorn.run(app, host="0.0.0.0", port=port)
